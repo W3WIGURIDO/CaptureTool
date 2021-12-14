@@ -292,9 +292,9 @@ namespace CaptureTool
             return Extend.ConvertBitmapToBitmapImage(bitmap);
         }
 
+        private static DesktopDuplication.DesktopDuplicator desktopDuplicator;
         private static Bitmap CaptureControl(IntPtr handle, int mode, bool extend, bool screenFlag, bool aero, bool enableCursor, bool enableSetArrow, System.Drawing.Imaging.PixelFormat pixelFormat)
         {
-            //bool flag = GetWindowRect(handle, out RECT rect);
             int width;
             int height;
             RECT rect;
@@ -316,43 +316,8 @@ namespace CaptureTool
                 }
                 else
                 {
-                    //float dpiScale = (new System.Windows.Forms.Form().CreateGraphics().DpiX) / 96;
-                    //System.Windows.Forms.Form tform = new System.Windows.Forms.Form();
-                    //tform.Show();
-                    //double tfDPI = tform.DeviceDpi;
-
-                    //1
-                    //SetProcessDPIAware();
-                    //var dc = GetWindowDC(IntPtr.Zero);
-                    //int dx = GetDeviceCaps(dc, 88);
-                    //int dy = GetDeviceCaps(dc, 90);
-                    //Graphics tgrp = Graphics.FromHdc(dc);
-                    //float gdx = tgrp.DpiX;
-                    //float gdy = tgrp.DpiY;
-                    //ReleaseDC(IntPtr.Zero, dc);
-                    //1
-
-                    //2
-                    //double widthDPI = PresentationSource.FromVisual(MainWindow.GetMainWindow()).CompositionTarget.TransformFromDevice.M11;
-                    //double heightDPI = PresentationSource.FromVisual(MainWindow.GetMainWindow()).CompositionTarget.TransformFromDevice.M12;
-                    //width = (int)(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width * widthDPI);
-                    //height = (int)(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height * heightDPI);
-                    //2
-
                     width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
                     height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
-
-                    //int smx = GetSystemMetrics(SM_CXSCREEN);
-                    //int smy = GetSystemMetrics(SM_CYSCREEN);
-                    //int sfx = GetSystemMetrics(SM_CXFULLSCREEN);
-                    //int sfy = GetSystemMetrics(SM_CYFULLSCREEN);
-                    //int vx = GetSystemMetrics(SM_XVIRTUALSCREEN);
-                    //int vy = GetSystemMetrics(SM_YVIRTUALSCREEN);
-                    //int cvx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-                    //int cvy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-                    //width = (int)System.Windows.SystemParameters.VirtualScreenWidth;
-                    //height = (int)System.Windows.SystemParameters.VirtualScreenHeight;
                     rect = new RECT() { left = 0, right = width, top = 0, bottom = height };
                 }
             }
@@ -394,6 +359,7 @@ namespace CaptureTool
                 }
             }
 
+            //BitmapからGraphicsを作成
             Bitmap img = new Bitmap(width, height);
             //Bitmap img = new Bitmap(width, height, pixelFormat);
             Graphics memg = Graphics.FromImage(img);
@@ -421,6 +387,10 @@ namespace CaptureTool
             {
                 System.Drawing.Rectangle rectangle = System.Drawing.Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
                 memg.CopyFromScreen(rect.left, rect.top, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
+            }
+            else if (mode == 3)
+            {
+                
             }
             else
             {
@@ -455,6 +425,7 @@ namespace CaptureTool
                     WriteCursorToGrap2(memg, rect.left, rect.top, enableSetArrow);
                 }
             }
+            //GraphicsをDisposeでBitmapに画像が入る
             memg.Dispose();
 
             if (pixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
@@ -504,9 +475,6 @@ namespace CaptureTool
 
             var oIcon = System.Drawing.Icon.FromHandle(cIcon);
             var oBitmap = oIcon.ToBitmap();
-#if DEBUG
-            //oBitmap.Save(@"C:\Users\fujimori.satoshi\Pictures\Capture\Test\cursor\cursor.png");
-#endif
             if (!GetIconInfo(cIcon, out ICONINFO iconInfo))
             {
                 return;
@@ -517,9 +485,6 @@ namespace CaptureTool
             if (iconInfo.hbmMask != IntPtr.Zero)
             {
                 hbmMask = System.Drawing.Image.FromHbitmap(iconInfo.hbmMask);
-#if DEBUG
-                //hbmMask.Save(@"C:\Users\fujimori.satoshi\Pictures\Capture\Test\cursor\mask.png");
-#endif
                 Bitmap tempB = new Bitmap(hbmMask.Width, hbmMask.Width);
                 Bitmap topMask = null;
                 Bitmap underMask = null;
@@ -533,9 +498,6 @@ namespace CaptureTool
                     topMask = hbmMask.Clone(new Rectangle(0, 0, hbmMask.Width, hbmMask.Width), hbmMask.PixelFormat);
                     hbmColor = System.Drawing.Image.FromHbitmap(iconInfo.hbmColor);
                     underMask = hbmColor;
-#if DEBUG
-                    //hbmColor.Save(@"C:\Users\fujimori.satoshi\Pictures\Capture\Test\cursor\color.png");
-#endif
                 }
                 else
                 {
@@ -566,26 +528,10 @@ namespace CaptureTool
                         tempB.SetPixel(tx, ty, xorColor);
                     }
                 }
-#if DEBUG
-                //tempB.Save(@"C:\Users\fujimori.satoshi\Pictures\Capture\Test\cursor\temp.png");
-#endif
                 g.DrawImage(tempB, DrPosition.X, DrPosition.Y);
                 return;
             }
             g.DrawIcon(oIcon, DrPosition.X, DrPosition.Y);
-
-            /*
-            Bitmap gBitmap = new Bitmap(oBitmap.Width, oBitmap.Height);
-            Graphics graphics = Graphics.FromImage(gBitmap);
-            graphics.DrawImage(oBitmap, 0, 0);
-            graphics.Dispose();
-            gBitmap.Save(@"C:\tmp\testCursor.png", ImageFormat.Png);
-            var cBitmap = new Bitmap(oBitmap);
-            cBitmap.Save(@"C:\tmp\testCursor.png", ImageFormat.Png);
-            oIcon.ToBitmap().Save(@"C:\temp\testCursor.png", ImageFormat.Png);
-            //Bitmap oCursor = System.Drawing.Image.FromHbitmap(cInfo.hCursor);
-            //oCursor.Save("C:\temp\testCursor.png", ImageFormat.Png);
-            */
         }
 
         public static System.Windows.Media.Imaging.BitmapSource GetBitmapSourceFromIconHandle(IntPtr hIcon)

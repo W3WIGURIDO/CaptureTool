@@ -44,8 +44,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DesktopDuplication">
-      <HintPath>..\..\desktop-duplication-net-master\DesktopDuplication\bin\Release\DesktopDuplication.dll</HintPath>
+    <Reference Include="DesktopDuplication, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\source\repos\desktop-duplication-net-master\DesktopDuplication\bin\Release\DesktopDuplication.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -65,7 +66,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="WpfFolderBrowser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\CloseProjects\WpfFolderBrowser\WpfFolderBrowser\bin\Release\WpfFolderBrowser.dll</HintPath>
+      <HintPath>..\..\..\..\source\repos\CloseProjects\WpfFolderBrowser\WpfFolderBrowser\bin\Release\WpfFolderBrowser.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
