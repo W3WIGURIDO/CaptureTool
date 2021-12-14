@@ -1,0 +1,79 @@
+﻿<Window x:Class="CaptureTool.MiniWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CaptureTool"
+        mc:Ignorable="d"
+        Title="CaptureTool" Width="350" Topmost="True" SizeToContent="Height" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" Closed="Window_Closed">
+    <Grid>
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="ファイル名"/>
+                <TextBox x:Name="fileNameBox" Grid.Column="1" Text="{Binding FileName}" TextChanged="FileNameBox_TextChanged"/>
+            </Grid>
+            <StackPanel Orientation="Horizontal" x:Name="countButtonPanel"/>
+            <Grid Margin="0,2,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="連番付加"/>
+                <CheckBox Grid.Column="1" IsChecked="{Binding EnableNumber}"/>
+                <TextBlock Text="桁数" Grid.Column="2" Margin="5,0,0,0"/>
+                <TextBox x:Name="digitsTextBox" Grid.Column="3" Text="{Binding DigitsText}" TextChanged="DigitsTextBox_TextChanged" MinWidth="30"/>
+                <TextBlock Text="カウント：" Grid.Column="4" Margin="5,0,0,0"/>
+                <TextBox x:Name="countTextBox" Grid.Column="5" Text="{Binding NumberCount}" MinWidth="30" TextChanged="CountTextBox_TextChanged"/>
+                <StackPanel Grid.Column="6" Margin="0,0,1,0">
+                    <Button x:Name="countUpButton" FontSize="5" MinWidth="20" Click="CountUpButton_Click">
+                        <Button.Content>
+                            <TextBlock Text="▲" RenderTransformOrigin="0.5,0.5">
+                                <TextBlock.RenderTransform>
+                                    <ScaleTransform ScaleX="3.5" ScaleY="1.3"/>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button x:Name="countDownButton" FontSize="5" MinWidth="20" Click="CountDownButton_Click">
+                        <Button.Content>
+                            <TextBlock Text="▼" RenderTransformOrigin="0.5,1">
+                                <TextBlock.RenderTransform>
+                                    <ScaleTransform ScaleX="3.5" ScaleY="1.3"/>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+                <Button Content="リセット" Grid.Column="7" Click="NumberResetClick"/>
+                <Button x:Name="continueButton" Content="続行" Grid.Column="8" Click="ContinueButton_Click"/>
+            </Grid>
+            <Grid Margin="0,2,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="次回保存ファイル名："/>
+                <TextBlock Text="{Binding SampleFileName}" Margin="5,0,0,0" Grid.Column="1" TextWrapping="Wrap"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="ミニ画面" Grid.Column="0"/>
+                <CheckBox x:Name="miniModeCheck" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,5,0" Unchecked="MiniModeCheck_Unchecked" IsChecked="True"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
