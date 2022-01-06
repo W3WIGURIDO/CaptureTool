@@ -165,6 +165,12 @@ namespace CaptureTool
 
         public const int SRCCOPY = 13369376;
 
+        static MainProcess()
+        {
+            AllScreens = System.Windows.Forms.Screen.AllScreens.ToList();
+            AllScreens.Remove(System.Windows.Forms.Screen.PrimaryScreen);
+            AllScreens.Insert(0, System.Windows.Forms.Screen.PrimaryScreen);
+        }
 
         public static OverlayWindow prevOverlayWindow;
         private const string FormatText = "Text";
@@ -293,11 +299,16 @@ namespace CaptureTool
         }
 
         private static DesktopDuplication.DesktopDuplicator desktopDuplicator;
+        private static int DesktopDuplicatorNum = -1;
+        private static List<System.Windows.Forms.Screen> AllScreens;
         private static Bitmap CaptureControl(IntPtr handle, int mode, bool extend, bool screenFlag, bool aero, bool enableCursor, bool enableSetArrow, System.Drawing.Imaging.PixelFormat pixelFormat)
         {
             int width;
             int height;
             RECT rect;
+            var activeDisplay = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+            int displayIndex = AllScreens.IndexOf(activeDisplay);
+
             if (screenFlag)
             {
                 if (mode == 0)
@@ -307,18 +318,18 @@ namespace CaptureTool
                     height = rect.bottom - rect.top;
                     if (width <= 0)
                     {
-                        width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+                        width = activeDisplay.Bounds.Width;
                     }
                     if (height <= 0)
                     {
-                        height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+                        height = activeDisplay.Bounds.Height;
                     }
                 }
                 else
                 {
-                    width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-                    height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
-                    rect = new RECT() { left = 0, right = width, top = 0, bottom = height };
+                    width = activeDisplay.Bounds.Width;
+                    height = activeDisplay.Bounds.Height;
+                    rect = new RECT() { left = activeDisplay.Bounds.Left, right = width, top = activeDisplay.Bounds.Top, bottom = height };
                 }
             }
             else
@@ -351,11 +362,11 @@ namespace CaptureTool
                 height = rect.bottom - rect.top;
                 if (width <= 0)
                 {
-                    width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+                    width = activeDisplay.Bounds.Width;
                 }
                 if (height <= 0)
                 {
-                    height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+                    height = activeDisplay.Bounds.Height;
                 }
             }
 
@@ -370,15 +381,15 @@ namespace CaptureTool
                 memg.ReleaseHdc(dc);
                 if (screenFlag)
                 {
-                    int pwidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-                    int pheight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+                    int pwidth = activeDisplay.Bounds.Width;
+                    int pheight = activeDisplay.Bounds.Height;
                     System.Drawing.Rectangle rectangle = System.Drawing.Rectangle.FromLTRB(0, 0, pwidth, pheight);
                     Bitmap img2 = new Bitmap(pwidth, pheight);
                     //Bitmap img = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     Graphics memg2 = Graphics.FromImage(img2);
                     memg.Dispose();
-                    memg2.CopyFromScreen(0, 0, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
-                    memg2.DrawImage(img, new PointF(rect.left, rect.top));
+                    memg2.CopyFromScreen(activeDisplay.Bounds.Left, activeDisplay.Bounds.Top, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
+                    memg2.DrawImage(img, new PointF(rect.left - activeDisplay.Bounds.Left, rect.top - activeDisplay.Bounds.Top));
                     memg = memg2;
                     img = img2;
                 }
@@ -390,7 +401,41 @@ namespace CaptureTool
             }
             else if (mode == 3)
             {
-                
+                if (DesktopDuplicatorNum != displayIndex)
+                {
+                    desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
+                    DesktopDuplicatorNum = displayIndex;
+                    desktopDuplicator.GetLatestFrame();
+                }
+                DesktopDuplication.DesktopFrame frame = null;
+                int tryCount = 0;
+                while (tryCount < 3)
+                {
+                    try
+                    {
+                        frame = desktopDuplicator.GetLatestFrame();
+                        if (frame == null)
+                        {
+                            tryCount++;
+                            continue;
+                        }
+                        Bitmap dupBitmap = frame.DesktopImage.Clone(new Rectangle(rect.left - activeDisplay.Bounds.Left, rect.top - activeDisplay.Bounds.Top, width, height), pixelFormat);
+                        //Bitmap dupBitmap = frame.DesktopImage;
+                        //dupBitmap.Save($@"C:\Users\zz030209\Pictures\Capture\Test\dupTest{desktopDuplicator1.GetHashCode()}.png");
+                        memg.DrawImage(dupBitmap, 0, 0);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                        desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
+                        if (tryCount > 1)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                        tryCount++;
+                    }
+                }
             }
             else
             {
