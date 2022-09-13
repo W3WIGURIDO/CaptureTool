@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CaptureTool"
         mc:Ignorable="d"
-        Title="CaptureTool" Height="620" Width="480" Closing="Window_Closing" Loaded="Window_Loaded" StateChanged="Window_StateChanged" IsVisibleChanged="Window_IsVisibleChanged">
+        Title="CaptureTool" Height="640" Width="480" Closing="Window_Closing" Loaded="Window_Loaded" StateChanged="Window_StateChanged" IsVisibleChanged="Window_IsVisibleChanged">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding RefFolderCom}" Gesture="Ctrl+R"/>
+    </Window.InputBindings>
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -90,8 +93,9 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="saveFolder" Text="{Binding Directory}" TextChanged="SaveFolder_TextChanged"/>
-                <Button Content="参照" Margin="5,0,0,0" Grid.Column="1" Click="ClickRef"/>
+                <Button Content="参照(R)" Margin="5,0,0,0" Grid.Column="1" Click="ClickRef" Focusable="False"/>
             </Grid>
+            <StackPanel Orientation="Horizontal" x:Name="folderCountButtonPanel"/>
             <Grid Margin="0,2,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>

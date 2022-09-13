@@ -52,6 +52,9 @@ namespace CaptureTool
             this.DataContext = settings;
             _ActiveWindow = this;
             Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+
+            settings.RefFolderCom.InputGestures.Add(new KeyGesture(Key.N, ModifierKeys.Control));
+            CommandBindings.Add(new CommandBinding(settings.RefFolderCom, ClickRef));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -356,6 +359,7 @@ namespace CaptureTool
         private void SaveFolder_TextChanged(object sender, TextChangedEventArgs e)
         {
             settings.Directory = saveFolder.Text;
+            MainProcess.CreateFolderNameNumberCountButtons(settings.Directory, folderCountButtonPanel, settings);
         }
 
         private void DigitsTextBox_TextChanged(object sender, TextChangedEventArgs e)

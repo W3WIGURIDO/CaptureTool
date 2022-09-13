@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace CaptureTool
@@ -471,6 +472,17 @@ namespace CaptureTool
         {
             get => _CaptureModes;
         }
+
+        private RoutedCommand _RefFolderCom = new RoutedCommand();
+        public RoutedCommand RefFolderCom
+        {
+            get => _RefFolderCom;
+            set
+            {
+                _RefFolderCom = value;
+            }
+        }
+
 
         private string CreateSampleFileName()
         {

@@ -403,6 +403,11 @@ namespace CaptureTool
             {
                 if (DesktopDuplicatorNum != displayIndex)
                 {
+                    if (desktopDuplicator != null)
+                    {
+                        desktopDuplicator.Dispose();
+                        desktopDuplicator = null;
+                    }
                     desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
                     DesktopDuplicatorNum = displayIndex;
                     desktopDuplicator.GetLatestFrame();
@@ -616,7 +621,7 @@ namespace CaptureTool
             return regex.Matches(fileName);
         }
 
-        public static void CreateFileNameNumberCountButtons(string fileName, StackPanel owner, Settings settings)
+        public static void CreateFileNameNumberCountButtons(string fileName, StackPanel owner, Settings settings, int mode)
         {
             MatchCollection matchCollection = FileNameNumberSearch(fileName);
             if (matchCollection.Count > 0)
@@ -633,34 +638,70 @@ namespace CaptureTool
             foreach (Match match in matchCollection)
             {
                 Match tmpMatch = match;
-                TextBlock textBlock = new TextBlock() { Text = count + ":" };
-                StackPanel stackPanel = new StackPanel() { Margin = new Thickness(0, 0, 2, 0) };
-                Button upButton = new Button() { Content = new TextBlock() { Text = "▲", RenderTransformOrigin = new System.Windows.Point(0.5, 0.5), RenderTransform = new ScaleTransform(3.5, 1.3) }, FontSize = 5, MinWidth = 20 };
-                upButton.Click += (sender, e) =>
+                TextBlock textBlock = new TextBlock() { Text = match.Value + ":", Margin = new Thickness(0, 0, 0.5, 0), Focusable = false };
+                StackPanel stackPanel = new StackPanel() { Margin = new Thickness(0, 0, 3, 0), Focusable = false };
+                Button upButton = new Button() { Content = new TextBlock() { Text = "▲", RenderTransformOrigin = new System.Windows.Point(0.5, 0.5), RenderTransform = new ScaleTransform(3.5, 1.3) }, FontSize = 5, MinWidth = 20, Focusable = false };
+                Button downButton = new Button() { Content = new TextBlock() { Text = "▼", RenderTransformOrigin = new System.Windows.Point(0.5, 1), RenderTransform = new ScaleTransform(3.5, 1.3) }, FontSize = 5, MinWidth = 20, Focusable = false };
+                if (mode == 0)
                 {
-                    if (int.TryParse(match.Value, out int parsed))
+                    upButton.Click += (sender, e) =>
                     {
-                        string numberFormat = "{0:D" + tmpMatch.Length + "}";
-                        string formatedNumber = string.Format(numberFormat, parsed + 1);
-                        settings.FileName = settings.FileName.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
-                    }
-                };
-                Button downButton = new Button() { Content = new TextBlock() { Text = "▼", RenderTransformOrigin = new System.Windows.Point(0.5, 1), RenderTransform = new ScaleTransform(3.5, 1.3) }, FontSize = 5, MinWidth = 20 };
-                downButton.Click += (sender, e) =>
+                        if (int.TryParse(match.Value, out int parsed))
+                        {
+                            string numberFormat = "{0:D" + tmpMatch.Length + "}";
+                            string formatedNumber = string.Format(numberFormat, parsed + 1);
+                            settings.FileName = settings.FileName.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
+                            textBlock.Text = formatedNumber.ToString() + ":";
+                        }
+                    };
+                    downButton.Click += (sender, e) =>
+                    {
+                        if (int.TryParse(match.Value, out int parsed))
+                        {
+                            string numberFormat = "{0:D" + tmpMatch.Length + "}";
+                            string formatedNumber = string.Format(numberFormat, parsed - 1);
+                            settings.FileName = settings.FileName.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
+                            textBlock.Text = formatedNumber.ToString() + ":";
+                        }
+                    };
+                }
+                else
                 {
-                    if (int.TryParse(match.Value, out int parsed))
+                    upButton.Click += (sender, e) =>
                     {
-                        string numberFormat = "{0:D" + tmpMatch.Length + "}";
-                        string formatedNumber = string.Format(numberFormat, parsed - 1);
-                        settings.FileName = settings.FileName.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
-                    }
-                };
+                        if (int.TryParse(match.Value, out int parsed))
+                        {
+                            string numberFormat = "{0:D" + tmpMatch.Length + "}";
+                            string formatedNumber = string.Format(numberFormat, parsed + 1);
+                            settings.Directory = settings.Directory.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
+                        }
+                    };
+                    downButton.Click += (sender, e) =>
+                    {
+                        if (int.TryParse(match.Value, out int parsed))
+                        {
+                            string numberFormat = "{0:D" + tmpMatch.Length + "}";
+                            string formatedNumber = string.Format(numberFormat, parsed - 1);
+                            settings.Directory = settings.Directory.ReplaceAt(tmpMatch.Index, tmpMatch.Length, formatedNumber);
+                        }
+                    };
+                }
                 stackPanel.Children.Add(upButton);
                 stackPanel.Children.Add(downButton);
                 owner.Children.Add(textBlock);
                 owner.Children.Add(stackPanel);
                 count++;
             }
+        }
+
+        public static void CreateFileNameNumberCountButtons(string fileName, StackPanel owner, Settings settings)
+        {
+            CreateFileNameNumberCountButtons(fileName, owner, settings, 0);
+        }
+
+        public static void CreateFolderNameNumberCountButtons(string fileName, StackPanel owner, Settings settings)
+        {
+            CreateFileNameNumberCountButtons(fileName, owner, settings, 1);
         }
 
         public static string ReplaceAt(this string str, int index, int length, string replace)
