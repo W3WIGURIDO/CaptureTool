@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -29,6 +31,76 @@ namespace CaptureTool
         {
             InitializeComponent();
             viewingText.Text = text;
+        }
+
+        #region const values
+
+        private const int GWL_STYLE = (-16);
+        private const int GWL_EXSTYLE = (-20);
+        private const int WS_SYSMENU = 0x00080000;
+        private const int WS_EX_TRANSPARENT = 0x00000020;
+        private const int WM_SYSKEYDOWN = 0x0104;
+        private const int VK_F4 = 0x73;
+
+        #endregion
+
+        #region Win32Apis
+
+        [DllImport("user32")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwLong);
+
+        #endregion
+
+        #region ClickThrough
+
+        public bool ClickThrough
+        {
+            get { return (bool)GetValue(ClickThroughProperty); }
+            set { SetValue(ClickThroughProperty, value); }
+        }
+
+        public static readonly DependencyProperty ClickThroughProperty =
+            DependencyProperty.Register(nameof(ClickThrough), typeof(bool), typeof(OverlayDialog), new PropertyMetadata(true, ClickThroughPropertyChanged));
+
+        private static void ClickThroughPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is OverlayDialog window)
+            {
+                window.SetClickThrough((bool)e.NewValue);
+            }
+        }
+
+        #endregion
+
+        protected void SetClickThrough(bool value)
+        {
+            try
+            {
+                IntPtr handle = new WindowInteropHelper(this).Handle;
+                int extendStyle = GetWindowLong(handle, GWL_EXSTYLE);
+                if (value)
+                {
+                    extendStyle |= WS_EX_TRANSPARENT;
+                }
+                else
+                {
+                    extendStyle &= ~WS_EX_TRANSPARENT;
+                }
+                SetWindowLong(handle, GWL_EXSTYLE, extendStyle);
+            }
+            catch
+            {
+
+            }
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            this.SetClickThrough(this.ClickThrough);
+            base.OnSourceInitialized(e);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
