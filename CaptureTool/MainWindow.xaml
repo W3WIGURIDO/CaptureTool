@@ -170,13 +170,13 @@
                 <Grid Grid.Row="1" IsEnabled="{Binding EnableOverlay}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="表示時間" Margin="0,0,5,0"/>
-                    <TextBox x:Name="overlayTimeTextBox" Grid.Column="1" ToolTip="ミリ秒で入力" Text="{Binding OverlayTime}" TextChanged="OverlayTimeTextBox_TextChanged"/>
+                    <TextBox x:Name="overlayTimeTextBox" Grid.Column="1" ToolTip="ミリ秒で入力" Text="{Binding OverlayTime}" TextChanged="OverlayTimeTextBox_TextChanged" Width="80"/>
                     <TextBlock Grid.Column="2" Text="ms"/>
                     <TextBlock Grid.Column="3" Text="位置" Margin="15,0,5,0"/>
                     <ComboBox x:Name="positionSelect" SelectedIndex="{Binding PositionIndex}" Grid.Column="4" VerticalAlignment="Center" Width="100" HorizontalAlignment="Left" ItemsSource="{Binding ViewPosition}" SelectedValuePath="Value" DisplayMemberPath="Key"/>

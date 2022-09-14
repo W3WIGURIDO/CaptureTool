@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,7 +54,7 @@ namespace CaptureTool
             _ActiveWindow = this;
             Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
 
-            settings.RefFolderCom.InputGestures.Add(new KeyGesture(Key.N, ModifierKeys.Control));
+            settings.RefFolderCom.InputGestures.Add(new KeyGesture(Key.R, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(settings.RefFolderCom, ClickRef));
         }
 
@@ -290,10 +291,21 @@ namespace CaptureTool
 
         private void ClickRef(object sender, RoutedEventArgs e)
         {
-            WpfFolderBrowser.FolderDialogResult folderDialogResult = WpfFolderBrowser.Main.ShowFolderDialog(this, false, baseAddress: settings.Directory);
-            if (folderDialogResult != null)
+            using (var cofd = new CommonOpenFileDialog()
             {
-                settings.Directory = folderDialogResult.FullName;
+                Title = "フォルダを選択してください",
+                InitialDirectory = settings.Directory,
+                // フォルダ選択モードにする
+                IsFolderPicker = true,
+            })
+            {
+                if (cofd.ShowDialog() != CommonFileDialogResult.Ok)
+                {
+                    return;
+                }
+
+                // FileNameで選択されたフォルダを取得する
+                settings.Directory = cofd.FileName;
             }
         }
 
