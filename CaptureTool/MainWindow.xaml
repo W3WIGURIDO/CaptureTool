@@ -116,6 +116,8 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="連番付加"/>
                 <CheckBox Grid.Column="1" IsChecked="{Binding EnableNumber}"/>
@@ -145,6 +147,8 @@
                 </StackPanel>
                 <Button Content="リセット" Grid.Column="7" Click="NumberResetClick"/>
                 <Button x:Name="continueButton" Content="続行" Grid.Column="8" Click="ContinueButton_Click"/>
+                <TextBlock Text="接続語：" Grid.Column="9" Margin="5,0,0,0"/>
+                <TextBox Grid.Column="10" Text="{Binding CountConju}" MinWidth="30"/>
             </Grid>
             <Grid Margin="0,2,0,0">
                 <Grid.ColumnDefinitions>

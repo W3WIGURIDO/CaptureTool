@@ -151,7 +151,6 @@ namespace CaptureTool
             get => _FileName;
             set
             {
-                //string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[\\\\/:*?\"<>|\r\n]", string.Empty);
                 string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
                 string[] enSplited = tmpValue.Split('\\');
                 if (enSplited.Length == 1)
@@ -495,6 +494,20 @@ namespace CaptureTool
             }
         }
 
+        private string _CountConju;
+        public string CountConju
+        {
+            get => _CountConju;
+            set
+            {
+                string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
+                _CountConju = tmpValue;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CountConju));
+                CreateSampleFileName();
+            }
+        }
+
         private string CreateSampleFileName()
         {
             string numberFormat = "{0:D" + NumberDigits + "}";
@@ -502,7 +515,7 @@ namespace CaptureTool
             string tmpSampleFileName;
             if (EnableNumber == true)
             {
-                tmpSampleFileName = FileName + formatedNumber;
+                tmpSampleFileName = FileName + CountConju + formatedNumber;
             }
             else
             {
@@ -557,6 +570,7 @@ namespace CaptureTool
                 FileName = GetStringFromSettingFile(nameof(FileName), "Capture");
                 DigitsText = GetStringFromSettingFile(nameof(DigitsText), "3");
                 OverlayTime = GetStringFromSettingFile(nameof(OverlayTime), "3000");
+                CountConju = GetStringFromSettingFile(nameof(CountConju), "_");
 
                 int GetIntFromString(string name, int defaultInt)
                 {
@@ -631,7 +645,8 @@ namespace CaptureTool
                 new XElement(nameof(EnableSetArrow), EnableSetArrow.ToString()),
                 new XElement(nameof(PixelFormatIndex), PixelFormatIndex.ToString()),
                 new XElement(nameof(CaptureModeIndex), CaptureModeIndex.ToString()),
-                new XElement(nameof(EnableVisibilityControl), EnableVisibilityControl.ToString())
+                new XElement(nameof(EnableVisibilityControl), EnableVisibilityControl.ToString()),
+                new XElement(nameof(CountConju), CountConju)
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -660,6 +675,7 @@ namespace CaptureTool
             PixelFormatIndex = 0;
             CaptureModeIndex = 1;
             EnableVisibilityControl = true;
+            CountConju = "_";
         }
     }
 
