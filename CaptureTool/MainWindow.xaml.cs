@@ -473,5 +473,11 @@ namespace CaptureTool
                 settings.Directory = string.Join("\\", enSplited.Take(enSplited.Length - 1));
             }
         }
+
+        private void fileNameLabel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            fileNameBox.Focus();
+            fileNameBox.SelectAll();
+        }
     }
 }

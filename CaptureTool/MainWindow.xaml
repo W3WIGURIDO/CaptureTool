@@ -101,7 +101,7 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="ファイル名"/>
+                <TextBlock x:Name="fileNameLabel" Text="ファイル名" MouseLeftButtonUp="fileNameLabel_MouseLeftButtonUp"/>
                 <TextBox x:Name="fileNameBox" Grid.Column="1" Text="{Binding FileName}" TextChanged="FileNameBox_TextChanged"/>
             </Grid>
             <StackPanel Orientation="Horizontal" x:Name="countButtonPanel"/>
