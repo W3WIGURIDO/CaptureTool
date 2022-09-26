@@ -44,7 +44,6 @@ namespace CaptureTool
         private void NumberResetClick(object sender, RoutedEventArgs e)
         {
             settings.NumberCount = 0;
-            settings.NumberCountSave();
         }
 
         private void DigitsTextBox_TextChanged(object sender, TextChangedEventArgs e)

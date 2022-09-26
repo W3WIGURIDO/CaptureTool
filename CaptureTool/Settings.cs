@@ -483,6 +483,17 @@ namespace CaptureTool
             }
         }
 
+        private bool? _EnableVisibilityControl;
+        public bool? EnableVisibilityControl
+        {
+            get => _EnableVisibilityControl;
+            set
+            {
+                _EnableVisibilityControl = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(EnableVisibilityControl));
+            }
+        }
 
         private string CreateSampleFileName()
         {
@@ -585,36 +596,12 @@ namespace CaptureTool
                 EnableCursor = GetBoolFromString(nameof(EnableCursor), false);
                 EnableChangeCapture = GetBoolFromString(nameof(EnableChangeCapture), false);
                 EnableSetArrow = GetBoolFromString(nameof(EnableSetArrow), false);
+                EnableVisibilityControl = GetBoolFromString(nameof(EnableVisibilityControl), true);
             }
             else
             {
                 ResetSettings();
             }
-
-            /*
-            Key = Properties.Settings.Default.Key;
-            PreKey = Properties.Settings.Default.PreKey;
-            Directory = Properties.Settings.Default.Directory;
-            if (string.IsNullOrEmpty(Directory))
-            {
-                Directory = defaultDirectory;
-            }
-            FileName = Properties.Settings.Default.FileName;
-            EnableNumber = Properties.Settings.Default.EnableNumber;
-            DigitsText = Properties.Settings.Default.DigitsText;
-            NumberCount = Properties.Settings.Default.NumberCount;
-            SaveFormatIndex = Properties.Settings.Default.SaveFormatIndex;
-            EnableTray = Properties.Settings.Default.EnableTray;
-            EnableOverlay = Properties.Settings.Default.EnableOverlay;
-            OverlayTime = Properties.Settings.Default.OverlayTime;
-            PositionIndex = Properties.Settings.Default.PositionIndex;
-            ScreenKey = Properties.Settings.Default.ScreenKey;
-            ScreenPreKey = Properties.Settings.Default.ScreenPreKey;
-            EnableAero = Properties.Settings.Default.EnableAero;
-            EnableAutoSave = Properties.Settings.Default.EnableAutoSave;
-            SelectKey = Properties.Settings.Default.SelectKey;
-            SelectPreKey = Properties.Settings.Default.SelectPreKey;
-            */
         }
 
         public void SaveSettings()
@@ -643,38 +630,11 @@ namespace CaptureTool
                 new XElement(nameof(OverlayY), OverlayY.ToString()),
                 new XElement(nameof(EnableSetArrow), EnableSetArrow.ToString()),
                 new XElement(nameof(PixelFormatIndex), PixelFormatIndex.ToString()),
-                new XElement(nameof(CaptureModeIndex), CaptureModeIndex.ToString())
+                new XElement(nameof(CaptureModeIndex), CaptureModeIndex.ToString()),
+                new XElement(nameof(EnableVisibilityControl), EnableVisibilityControl.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
-
-            /*
-            Properties.Settings.Default.Key = Key;
-            Properties.Settings.Default.PreKey = PreKey;
-            Properties.Settings.Default.Directory = Directory;
-            Properties.Settings.Default.FileName = FileName;
-            Properties.Settings.Default.EnableNumber = EnableNumber == true;
-            Properties.Settings.Default.DigitsText = DigitsText;
-            Properties.Settings.Default.NumberCount = NumberCount;
-            Properties.Settings.Default.SaveFormatIndex = SaveFormatIndex;
-            Properties.Settings.Default.EnableTray = EnableTray == true;
-            Properties.Settings.Default.EnableOverlay = EnableOverlay == true;
-            Properties.Settings.Default.OverlayTime = OverlayTime;
-            Properties.Settings.Default.PositionIndex = PositionIndex;
-            Properties.Settings.Default.ScreenKey = ScreenKey;
-            Properties.Settings.Default.ScreenPreKey = ScreenPreKey;
-            Properties.Settings.Default.EnableAero = EnableAero == true;
-            Properties.Settings.Default.EnableAutoSave = EnableAutoSave == true;
-            Properties.Settings.Default.SelectKey = SelectKey;
-            Properties.Settings.Default.SelectPreKey = SelectPreKey;
-            Properties.Settings.Default.Save();
-            */
-        }
-
-        public void NumberCountSave()
-        {
-            Properties.Settings.Default.NumberCount = NumberCount;
-            Properties.Settings.Default.Save();
         }
 
         public void ResetSettings()
@@ -699,6 +659,7 @@ namespace CaptureTool
             EnableSetArrow = false;
             PixelFormatIndex = 0;
             CaptureModeIndex = 1;
+            EnableVisibilityControl = true;
         }
     }
 

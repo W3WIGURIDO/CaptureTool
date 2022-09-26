@@ -152,7 +152,8 @@ namespace CaptureTool
                     {
                         targetWindow = this;
                     }
-                    if (tmpHotKey.HotKeyName == ScreenCapture)
+                    bool visibilityControl = false;
+                    if (tmpHotKey.HotKeyName == ScreenCapture && settings.EnableVisibilityControl == true)
                     {
                         Task.Run(() =>
                      {
@@ -161,12 +162,13 @@ namespace CaptureTool
                              targetWindow.Visibility = Visibility.Hidden;
                          }, System.Windows.Threading.DispatcherPriority.Send);
                      });
+                        visibilityControl = true;
                     }
                     var positionSet = (PositionSet)positionSelect.SelectedValue;
                     string imageFormatSelectStr = imageFormatSelect.SelectedValue.ToString();
                     Task.Run(() =>
                     {
-                        if (tmpHotKey.HotKeyName == ScreenCapture)
+                        if (visibilityControl)
                         {
                             System.Threading.Thread.Sleep(200);
                             while (targetWindow.Visibility == Visibility.Visible)
@@ -180,10 +182,9 @@ namespace CaptureTool
                             if (MainProcess.CaptureScreen(settings.Directory + "\\" + settings.SampleFileName, settings.Directory, imageFormatName: imageFormatSelectStr, overlayTime: settings.OverlayTimeInt, enableOverlay: settings.EnableOverlay == true, overlayHorizontalAlignment: positionSet.HorizontalAlignment, overlayVerticalAlignment: positionSet.VerticalAlignment, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName), aero: settings.EnableAero == true, enableCursor: settings.EnableCursor == true, captureMode: (int)captureModeSelect.SelectedValue, imageGridWidth: settings.OverlayX, imageGridHeight: settings.OverlayY, enableSetArrow: settings.EnableSetArrow == true, pixelFormat: (System.Drawing.Imaging.PixelFormat)pixelFormatSelect.SelectedValue))
                             {
                                 settings.NumberCount++;
-                                settings.NumberCountSave();
                             }
                         });
-                        if (tmpHotKey.HotKeyName == ScreenCapture)
+                        if (visibilityControl)
                         {
                             targetWindow.Dispatcher.Invoke(() =>
                             {
@@ -331,7 +332,6 @@ namespace CaptureTool
         private void NumberResetClick(object sender, RoutedEventArgs e)
         {
             settings.NumberCount = 0;
-            settings.NumberCountSave();
         }
 
         private void InvisibleButton_GotFocus(object sender, RoutedEventArgs e)

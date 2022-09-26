@@ -219,6 +219,10 @@
                 <TextBlock Text="終了時設定保存" Grid.Column="6"/>
                 <CheckBox Grid.Column="7" IsChecked="{Binding EnableAutoSave}" VerticalAlignment="Center" Margin="0,0,5,0"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="スクリーンキャプチャ時ウィンドウ非表示"/>
+                <CheckBox Grid.Column="1" IsChecked="{Binding EnableVisibilityControl}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            </StackPanel>
         </StackPanel>
         <Grid Grid.Row="1">
             <Button x:Name="saveButton" Content="設定保存" Click="ClickSave"/>
