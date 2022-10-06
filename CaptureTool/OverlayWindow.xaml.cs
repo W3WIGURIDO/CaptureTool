@@ -14,6 +14,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -230,22 +231,24 @@ namespace CaptureTool
             Task.Run(() =>
             {
                 Thread.Sleep(OverlayTime);
-                bool isContinue = true;
-                while (isContinue)
-                {
-                    gridView.Dispatcher.Invoke(() =>
-                    {
-                        gridView.Opacity = gridView.Opacity - 0.1;
-                        if (gridView.Opacity <= 0)
-                        {
-                            isContinue = false;
-                        }
-                    });
-                    Thread.Sleep(100);
-                }
+                //bool isContinue = true;
+                //while (isContinue)
+                //{
+                //    gridView.Dispatcher.Invoke(() =>
+                //    {
+                //        gridView.Opacity = gridView.Opacity - 0.1;
+                //        if (gridView.Opacity <= 0)
+                //        {
+                //            isContinue = false;
+                //        }
+                //    });
+                //    Thread.Sleep(100);
+                //}
+                Dispatcher.Invoke(() => { OpacityAnimation(); });
+                Thread.Sleep(1000);
                 if (ClosingReady)
                 {
-                    Dispatcher.Invoke(() => { Close(); });
+                    Dispatcher.Invoke(() => { Close(); }, System.Windows.Threading.DispatcherPriority.Send);
                 }
             });
         }
@@ -253,6 +256,25 @@ namespace CaptureTool
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             _ClosingReady = false;
+        }
+
+        private void OpacityAnimation()
+        {
+            var storyboard = new Storyboard();
+            DoubleAnimation CreateDoubleAnimation()
+            {
+                var da = new DoubleAnimation();
+                Storyboard.SetTarget(da, gridView);
+                Storyboard.SetTargetProperty(da, new PropertyPath("(Opacity)"));
+                storyboard.Children.Add(da);
+                return da;
+            }
+            DoubleAnimation da1 = CreateDoubleAnimation();
+            da1.To = 0;
+            da1.Duration = TimeSpan.FromSeconds(1);
+
+            // アニメーションを開始します
+            storyboard.Begin();
         }
     }
 }

@@ -22,6 +22,16 @@ namespace CaptureTool
     /// </summary>
     public partial class OverlayDialog : Window
     {
+        public static void ShowOverlayDialog(string text, Window owner)
+        {
+            OverlayDialog overlayDialog = new OverlayDialog(text);
+            if(owner != null)
+            {
+                overlayDialog.Owner = owner;
+            }
+            overlayDialog.Show();
+        }
+
         public OverlayDialog()
         {
             InitializeComponent();

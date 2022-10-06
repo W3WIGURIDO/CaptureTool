@@ -165,6 +165,49 @@ namespace CaptureTool
 
         public const int SRCCOPY = 13369376;
 
+        /**  
+        <summary>
+        ハンドル
+        表示状態
+        直前にウィンドウが表示されている場合, 0以外、そうでない場合は0
+        </summary>
+        **/
+        [DllImport("user32.dll")]
+        public static extern int ShowWindow(IntPtr handle, int command);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWINFO
+        {
+            public int cbSize;
+            public RECT rcWindow;
+            public RECT rcClient;
+            public int dwStyle;
+            public int dwExStyle;
+            public int dwWindowStatus;
+            public uint cxWindowBorders;
+            public uint cyWindowBorders;
+            public short atomWindowType;
+            public short wCreatorVersion;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+        public struct WINDOWPLACEMENT
+        {
+            public int length;
+            public int flags;
+            public int showCmd;
+            public System.Windows.Point ptMinPosition;
+            public System.Windows.Point ptMaxPosition;
+            public Rectangle rcNormalPosition;
+        }
+
+
         static MainProcess()
         {
             AllScreens = System.Windows.Forms.Screen.AllScreens.ToList();
@@ -236,6 +279,7 @@ namespace CaptureTool
 
                 if (prevOverlayWindow != null && prevOverlayWindow.ClosingReady)
                 {
+                    prevOverlayWindow.gridView.Opacity = 0;
                     prevOverlayWindow.Close();
                 }
 
@@ -732,8 +776,7 @@ namespace CaptureTool
             string numberFormat = "{0:D" + settings.NumberDigits + "}";
             for (int index = 0; ; index++)
             {
-                string formatedNumber = string.Format(numberFormat, index);
-                string tmpSampleFileName = settings.FileName + formatedNumber + "." + settings.SaveFormats[(SaveFormat)settings.SaveFormatIndex];
+                string tmpSampleFileName = settings.GetSampleFileName(index);
                 if (!File.Exists(settings.Directory + "\\" + tmpSampleFileName))
                 {
                     return index;

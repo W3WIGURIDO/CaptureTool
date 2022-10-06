@@ -151,24 +151,38 @@ namespace CaptureTool
             get => _FileName;
             set
             {
-                string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
-                string[] enSplited = tmpValue.Split('\\');
-                if (enSplited.Length == 1)
+                try
                 {
-                    _FileName = tmpValue;
-                }
-                else
-                {
-                    _FileName = enSplited.Last();
-                    if (Directory.Last() != '\\')
+                    string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
+                    if (tmpValue.Length > 259)
                     {
-                        Directory += "\\";
+                        MessageBox.Show("保存パスはフォルダパス、ファイルパス含めて260字未満になるように設定してください。" + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
+                        RaisePropertyChanged();
+                        RaisePropertyChanged(nameof(FileName));
+                        return;
                     }
-                    Directory += string.Join("\\", enSplited.Take(enSplited.Length - 1));
+                    string[] enSplited = tmpValue.Split('\\');
+                    if (enSplited.Length == 1)
+                    {
+                        _FileName = tmpValue;
+                    }
+                    else
+                    {
+                        _FileName = enSplited.Last();
+                        if (Directory.Last() != '\\')
+                        {
+                            Directory += "\\";
+                        }
+                        Directory += string.Join("\\", enSplited.Take(enSplited.Length - 1));
+                    }
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(FileName));
+                    CreateSampleFileName();
                 }
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(FileName));
-                CreateSampleFileName();
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
+                }
             }
         }
 
@@ -510,8 +524,15 @@ namespace CaptureTool
 
         private string CreateSampleFileName()
         {
+            _SampleFileName = GetSampleFileName(NumberCount);
+            RaisePropertyChanged(nameof(SampleFileName));
+            return _SampleFileName;
+        }
+
+        public string GetSampleFileName(int srcNum)
+        {
             string numberFormat = "{0:D" + NumberDigits + "}";
-            string formatedNumber = string.Format(numberFormat, NumberCount);
+            string formatedNumber = string.Format(numberFormat, srcNum);
             string tmpSampleFileName;
             if (EnableNumber == true)
             {
@@ -521,9 +542,7 @@ namespace CaptureTool
             {
                 tmpSampleFileName = FileName;
             }
-            _SampleFileName = tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
-            RaisePropertyChanged(nameof(SampleFileName));
-            return tmpSampleFileName;
+            return tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
         }
 
         const string SettingFile = "setting.xml";

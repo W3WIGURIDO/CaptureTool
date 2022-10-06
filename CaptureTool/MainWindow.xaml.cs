@@ -34,7 +34,8 @@ namespace CaptureTool
         private static string SelectWindow = "SelectWindow";
         private bool loadFinished = false;
         private MiniWindow miniWindow;
-        public IntPtr Handle { get; }
+        private System.Windows.Interop.WindowInteropHelper _InteropHelper;
+        public IntPtr Handle { get => _InteropHelper.Handle; }
         private static MainWindow mainWindow;
 
         public static MainWindow GetMainWindow()
@@ -46,13 +47,10 @@ namespace CaptureTool
         {
             InitializeComponent();
 
-            //System.Windows.Forms.Application.EnableVisualStyles();
-            //System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
-
             mainWindow = this;
             this.DataContext = settings;
             _ActiveWindow = this;
-            Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            _InteropHelper = new System.Windows.Interop.WindowInteropHelper(this);
 
             settings.RefFolderCom.InputGestures.Add(new KeyGesture(Key.R, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(settings.RefFolderCom, ClickRef));
@@ -74,7 +72,7 @@ namespace CaptureTool
             screenHotKey = new HotKey(EnumScan.FlagToMOD_KEY(settings.ScreenPreKey), settings.ScreenKey) { HotKeyName = ScreenCapture };
             screenHotKey.HotKeyPush += new EventHandler(HotKey_HotKeyPush);
             selectHotKey = new HotKey(EnumScan.FlagToMOD_KEY(settings.SelectPreKey), settings.SelectKey) { HotKeyName = SelectWindow };
-            selectHotKey.HotKeyPush += new EventHandler(HotKey_HotKeyPush);
+            selectHotKey.HotKeyPush += new EventHandler(HotKey_SelectWindow);
         }
 
         private void ResetHotKey()
@@ -91,69 +89,61 @@ namespace CaptureTool
             loadFinished = true;
         }
 
+        private void HotKey_SelectWindow(object sender, EventArgs e)
+        {
+            Window targetWindow;
+            TextBox targetBox;
+            if (miniWindow != null)
+            {
+                targetWindow = miniWindow;
+                targetBox = miniWindow.fileNameBox;
+            }
+            else
+            {
+                targetWindow = this;
+                targetBox = fileNameBox;
+            }
+            try
+            {
+                targetWindow.Visibility = Visibility.Visible;
+                targetWindow.WindowState = WindowState.Normal;
+                targetWindow.Activate();
+
+                string cbtext = MainProcess.GetClipBoardText();
+                if (!string.IsNullOrEmpty(cbtext))
+                {
+                    targetBox.Text = cbtext;
+                }
+
+                targetBox.Focus();
+                targetBox.SelectAll();
+            }
+            catch (Exception ex)
+            {
+                WpfFolderBrowser.CustomMessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+        }
+
         private void HotKey_HotKeyPush(object sender, EventArgs e)
         {
-            if (sender is HotKey tmpHotKey)
+            Window targetWindow;
+            IntPtr targetHandle;
+            if (miniWindow != null)
             {
-                if (tmpHotKey.HotKeyName == SelectWindow)
+                targetWindow = miniWindow;
+                targetHandle = miniWindow.Handle;
+            }
+            else
+            {
+                targetWindow = this;
+                targetHandle = Handle;
+            }
+            try
+            {
+                if (sender is HotKey tmpHotKey)
                 {
-                    if (miniWindow != null)
-                    {
-                        miniWindow.WindowState = WindowState.Normal;
-                        MainProcess.SwitchToThisWindow(miniWindow.Handle, true);
-                        miniWindow.Activate();
-                        MainProcess.SetWindowPos(miniWindow.Handle, MainProcess.HWND_TOPMOST, 0, 0, 0, 0, MainProcess.TOPMOST_FLAGS);
-
-                        string cbtext = MainProcess.GetClipBoardText();
-                        if (!string.IsNullOrEmpty(cbtext))
-                        {
-                            miniWindow.fileNameBox.Text = cbtext;
-                        }
-
-                        miniWindow.fileNameBox.Focus();
-                        miniWindow.fileNameBox.SelectAll();
-                        Task.Run(() =>
-                        {
-                            System.Threading.Thread.Sleep(100);
-                            MainProcess.SetWindowPos(miniWindow.Handle, MainProcess.HWND_NOTOPMOST, 0, 0, 0, 0, MainProcess.NOTOPMOST_FLAGS);
-                        });
-                    }
-                    else
-                    {
-                        Visibility = Visibility.Visible;
-                        WindowState = WindowState.Normal;
-                        MainProcess.SwitchToThisWindow(Handle, true);
-                        Activate();
-                        MainProcess.SetWindowPos(Handle, MainProcess.HWND_TOPMOST, 0, 0, 0, 0, MainProcess.TOPMOST_FLAGS);
-
-                        string cbtext = MainProcess.GetClipBoardText();
-                        if (!string.IsNullOrEmpty(cbtext))
-                        {
-                            fileNameBox.Text = cbtext;
-                        }
-
-                        fileNameBox.Focus();
-                        fileNameBox.SelectAll();
-                        Task.Run(() =>
-                        {
-                            System.Threading.Thread.Sleep(100);
-                            MainProcess.SetWindowPos(Handle, MainProcess.HWND_NOTOPMOST, 0, 0, 0, 0, MainProcess.NOTOPMOST_FLAGS);
-                        });
-                    }
-                }
-                else
-                {
-                    Window targetWindow;
-                    if (miniWindow != null)
-                    {
-                        targetWindow = miniWindow;
-                    }
-                    else
-                    {
-                        targetWindow = this;
-                    }
-                    bool visibilityControl = false;
-                    if (tmpHotKey.HotKeyName == ScreenCapture && settings.EnableVisibilityControl == true)
+                    bool visibilityControl = tmpHotKey.HotKeyName == ScreenCapture && settings.EnableVisibilityControl == true;
+                    if (visibilityControl)
                     {
                         Task.Run(() =>
                      {
@@ -162,7 +152,6 @@ namespace CaptureTool
                              targetWindow.Visibility = Visibility.Hidden;
                          }, System.Windows.Threading.DispatcherPriority.Send);
                      });
-                        visibilityControl = true;
                     }
                     var positionSet = (PositionSet)positionSelect.SelectedValue;
                     string imageFormatSelectStr = imageFormatSelect.SelectedValue.ToString();
@@ -171,11 +160,6 @@ namespace CaptureTool
                         if (visibilityControl)
                         {
                             System.Threading.Thread.Sleep(200);
-                            while (targetWindow.Visibility == Visibility.Visible)
-                            {
-                                System.Diagnostics.Debug.WriteLine("Sleep");
-                                System.Threading.Thread.Sleep(200);
-                            }
                         }
                         targetWindow.Dispatcher.Invoke(() =>
                         {
@@ -189,10 +173,14 @@ namespace CaptureTool
                             targetWindow.Dispatcher.Invoke(() =>
                             {
                                 targetWindow.Visibility = Visibility.Visible;
-                            }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                            }, System.Windows.Threading.DispatcherPriority.Background);
                         }
                     });
                 }
+            }
+            catch (Exception ex)
+            {
+                WpfFolderBrowser.CustomMessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
             }
         }
 
@@ -423,26 +411,6 @@ namespace CaptureTool
             Visibility = Visibility.Visible;
         }
 
-        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            /*
-            if (sender is Window windowVisibleChanged)
-            {
-                if (windowVisibleChanged.Visibility == Visibility.Hidden)
-                {
-                    var sb = new System.Windows.Media.Animation.Storyboard();
-                    var da = new System.Windows.Media.Animation.DoubleAnimation();
-                    System.Windows.Media.Animation.Storyboard.SetTarget(da, this);
-                    System.Windows.Media.Animation.Storyboard.SetTargetProperty(da, new PropertyPath("(Window.Opacity)"));
-                    da.To = 0;
-                    da.Duration = TimeSpan.FromMilliseconds(1);
-                    sb.Children.Add(da);
-                    sb.Begin();
-                }
-            }
-            */
-        }
-
         private void ContinueButton_Click(object sender, RoutedEventArgs e)
         {
             settings.NumberCount = MainProcess.GetContinueFileName(settings);
@@ -478,6 +446,12 @@ namespace CaptureTool
         {
             fileNameBox.Focus();
             fileNameBox.SelectAll();
+        }
+
+        private void SaveFolderLabel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            saveFolder.Focus();
+            saveFolder.SelectAll();
         }
     }
 }

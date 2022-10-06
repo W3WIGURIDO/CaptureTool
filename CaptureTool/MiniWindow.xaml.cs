@@ -21,14 +21,15 @@ namespace CaptureTool
     {
         private Settings settings;
         private bool loadFinished = false;
-        public IntPtr Handle { get; }
+        private System.Windows.Interop.WindowInteropHelper _InteropHelper;
+        public IntPtr Handle { get => _InteropHelper.Handle; }
 
         public MiniWindow(Settings settings)
         {
             InitializeComponent();
             this.settings = settings;
             this.DataContext = settings;
-            Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            _InteropHelper = new System.Windows.Interop.WindowInteropHelper(this);
         }
 
         private void FileNameBox_TextChanged(object sender, TextChangedEventArgs e)
