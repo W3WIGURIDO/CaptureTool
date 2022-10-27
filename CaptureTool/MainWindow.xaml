@@ -159,7 +159,7 @@
                 <TextBlock Text="{Binding SampleFileName}" Margin="5,0,0,0" Grid.Column="1" TextWrapping="Wrap"/>
             </Grid>
             <TextBlock Text="ファイル名オプション"/>
-            <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻"/>
+            <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名"/>
             <TextBlock Text="オーバーレイ設定" FontWeight="Bold" Margin="0,2,0,0"/>
             <Grid>
                 <Grid.RowDefinitions>

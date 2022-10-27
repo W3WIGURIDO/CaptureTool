@@ -13,6 +13,7 @@ namespace CaptureTool
 {
     public class Settings : INotifyPropertyChanged
     {
+        const string WordDir = "<Dir>";
         private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Capture";
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -139,9 +140,17 @@ namespace CaptureTool
             get => _Directory;
             set
             {
+                if (_Directory != null && !_Directory.Equals(value))
+                {
+                    NumberCount = 0;
+                }
                 _Directory = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(Directory));
+                if (FileName != null && FileName.Contains(WordDir))
+                {
+                    CreateSampleFileName();
+                }
             }
         }
 
@@ -153,7 +162,9 @@ namespace CaptureTool
             {
                 try
                 {
-                    string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
+                    //string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
+                    //独自の正規表現で<>を使用するため、<>を除外
+                    string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"|\r\n]", string.Empty);
                     if (tmpValue.Length > 259)
                     {
                         MessageBox.Show("保存パスはフォルダパス、ファイルパス含めて260字未満になるように設定してください。" + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
@@ -522,9 +533,30 @@ namespace CaptureTool
             }
         }
 
+        public string FileNameDirRegexConvert(string origStr, string dirName)
+        {
+            string tmpStr = origStr;
+            if (origStr.Contains(WordDir))
+            {
+                tmpStr = tmpStr.Replace(WordDir, dirName);
+            }
+            return tmpStr;
+        }
+
         private string CreateSampleFileName()
         {
-            _SampleFileName = GetSampleFileName(NumberCount);
+            string tmp = GetSampleFileName(NumberCount);
+            string dirName;
+            try
+            {
+                dirName = System.IO.Path.GetFileNameWithoutExtension(Directory);
+            }
+            catch
+            {
+                dirName = string.Empty;
+            }
+            string dirNamedstr = FileNameDirRegexConvert(tmp, dirName);
+            _SampleFileName = System.Text.RegularExpressions.Regex.Replace(dirNamedstr, "[<>]", string.Empty);
             RaisePropertyChanged(nameof(SampleFileName));
             return _SampleFileName;
         }

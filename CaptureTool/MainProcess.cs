@@ -215,14 +215,30 @@ namespace CaptureTool
             AllScreens.Insert(0, System.Windows.Forms.Screen.PrimaryScreen);
         }
 
+        public static string FileNameDateRegexConvert(string origStr)
+        {
+            const string WordDate = "<Date>";
+            const string WordTime = "<Time>";
+            string tmpStr = origStr;
+            if (origStr.Contains(WordDate))
+            {
+                string nowYMD = DateTime.Now.ToString("yyyyMMdd");
+                tmpStr = tmpStr.Replace(WordDate, nowYMD);
+            }
+            if (origStr.Contains(WordTime))
+            {
+                string nowHMS = DateTime.Now.ToString("HHmmss");
+                tmpStr = tmpStr.Replace(WordTime, nowHMS);
+            }
+            return tmpStr;
+        }
+
         public static OverlayWindow prevOverlayWindow;
         private const string FormatText = "Text";
 
         public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb)
         {
             const string WordWindowTitle = "<WindowTitle>";
-            const string WordDate = "<Date>";
-            const string WordTime = "<Time>";
             const string DesktopText = "Desktop";
             try
             {
@@ -263,18 +279,8 @@ namespace CaptureTool
                         dirName = dirName.Replace(WordWindowTitle, title);
                     }
                 }
-                if (fileName.Contains(WordDate))
-                {
-                    string nowYMD = DateTime.Now.ToString("yyyyMMdd");
-                    fileName = fileName.Replace(WordDate, nowYMD);
-                    dirName = dirName.Replace(WordDate, nowYMD);
-                }
-                if (fileName.Contains(WordTime))
-                {
-                    string nowHMS = DateTime.Now.ToString("HHmmss");
-                    fileName = fileName.Replace(WordTime, nowHMS);
-                    dirName = dirName.Replace(WordTime, nowHMS);
-                }
+                fileName = FileNameDateRegexConvert(fileName);
+                dirName = FileNameDateRegexConvert(dirName);
                 CreateDirectory(dirName);
 
                 if (prevOverlayWindow != null && prevOverlayWindow.ClosingReady)
