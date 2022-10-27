@@ -545,18 +545,7 @@ namespace CaptureTool
 
         private string CreateSampleFileName()
         {
-            string tmp = GetSampleFileName(NumberCount);
-            string dirName;
-            try
-            {
-                dirName = System.IO.Path.GetFileNameWithoutExtension(Directory);
-            }
-            catch
-            {
-                dirName = string.Empty;
-            }
-            string dirNamedstr = FileNameDirRegexConvert(tmp, dirName);
-            _SampleFileName = System.Text.RegularExpressions.Regex.Replace(dirNamedstr, "[<>]", string.Empty);
+            _SampleFileName = GetSampleFileName(NumberCount);
             RaisePropertyChanged(nameof(SampleFileName));
             return _SampleFileName;
         }
@@ -574,6 +563,18 @@ namespace CaptureTool
             {
                 tmpSampleFileName = FileName;
             }
+
+            string dirName;
+            try
+            {
+                dirName = System.IO.Path.GetFileNameWithoutExtension(Directory);
+            }
+            catch
+            {
+                dirName = string.Empty;
+            }
+            tmpSampleFileName = FileNameDirRegexConvert(tmpSampleFileName, dirName);
+            tmpSampleFileName = System.Text.RegularExpressions.Regex.Replace(tmpSampleFileName, "[<>]", string.Empty);
             return tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
         }
 
