@@ -453,5 +453,47 @@ namespace CaptureTool
             saveFolder.Focus();
             saveFolder.SelectAll();
         }
+
+        private void AddFavDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (settings.FavDirs.ContainsKey(settings.Directory))
+                {
+                    WpfFolderBrowser.CustomMessageBox.Show(this, "登録済みのディレクトリです。", "メッセージ");
+                    return;
+                }
+                string dirName = System.IO.Path.GetFileNameWithoutExtension(settings.Directory);
+                settings.AddFavDir(settings.Directory, dirName);
+                favcombo.SelectedIndex = settings.FavDirs.Count - 1;
+            }
+            catch (Exception ex)
+            {
+                WpfFolderBrowser.CustomMessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, "メッセージ");
+            }
+        }
+
+        private void RemoveFavDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                settings.RemoveFavDir(favcombo.SelectedValue.ToString());
+                favcombo.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                WpfFolderBrowser.CustomMessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, "メッセージ");
+            }
+        }
+
+        private void setFromFavDir_Click(object sender, RoutedEventArgs e)
+        {
+            settings.Directory = favcombo.SelectedValue.ToString();
+        }
+
+        private void chgFavDirNameButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

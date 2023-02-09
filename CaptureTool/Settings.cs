@@ -533,6 +533,33 @@ namespace CaptureTool
             }
         }
 
+        private readonly Dictionary<string, string> _FavDirs = new Dictionary<string, string>();
+        public Dictionary<string, string> FavDirs
+        {
+            get => _FavDirs;
+        }
+
+        public void AddFavDir(string key, string value)
+        {
+            _FavDirs.Add(key, value);
+            RaisePropertyChanged();
+            RaisePropertyChanged(nameof(FavDirs));
+        }
+
+        public void RemoveFavDir(string key)
+        {
+            _FavDirs.Remove(key);
+            RaisePropertyChanged();
+            RaisePropertyChanged(nameof(FavDirs));
+        }
+
+        public void ChangeFavDirName(string key, string value)
+        {
+            _FavDirs[key] = value;
+            RaisePropertyChanged();
+            RaisePropertyChanged(nameof(FavDirs));
+        }
+
         public string FileNameDirRegexConvert(string origStr, string dirName)
         {
             string tmpStr = origStr;

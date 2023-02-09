@@ -72,7 +72,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="WpfFolderBrowser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\source\repos\CloseProjects\WpfFolderBrowser\WpfFolderBrowser\bin\Release\WpfFolderBrowser.dll</HintPath>
+      <HintPath>..\..\WpfFolderBrowser\WpfFolderBrowser\bin\Release\WpfFolderBrowser.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
