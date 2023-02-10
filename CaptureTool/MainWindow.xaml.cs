@@ -477,7 +477,7 @@ namespace CaptureTool
         {
             try
             {
-                settings.RemoveFavDir(favcombo.SelectedValue.ToString());
+                settings.RemoveFavDir(favcombo.SelectedIndex);
                 favcombo.SelectedIndex = -1;
             }
             catch (Exception ex)
@@ -488,12 +488,21 @@ namespace CaptureTool
 
         private void setFromFavDir_Click(object sender, RoutedEventArgs e)
         {
-            settings.Directory = favcombo.SelectedValue.ToString();
+            if (favcombo.SelectedIndex >= 0)
+            {
+                settings.Directory = settings.FavDirs.ElementAt(favcombo.SelectedIndex).Key;
+            }
         }
 
         private void chgFavDirNameButton_Click(object sender, RoutedEventArgs e)
         {
-
+            if (favcombo.SelectedIndex >= 0)
+            {
+                string favdirName;
+                favdirName = new InputDialog("名前変更", "新しい名前を入力", "決定", settings.FavDirNames.ElementAt(favcombo.SelectedIndex)).ShowDialog();
+                if (!string.IsNullOrEmpty(favdirName))
+                    settings.ChangeFavDirName(favcombo.SelectedIndex, favdirName);
+            }
         }
     }
 }

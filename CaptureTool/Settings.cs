@@ -533,6 +533,12 @@ namespace CaptureTool
             }
         }
 
+        private readonly System.Collections.ObjectModel.ObservableCollection<string> _FavDirNames = new System.Collections.ObjectModel.ObservableCollection<string>();
+        public System.Collections.ObjectModel.ObservableCollection<string> FavDirNames
+        {
+            get => _FavDirNames;
+        }
+
         private readonly Dictionary<string, string> _FavDirs = new Dictionary<string, string>();
         public Dictionary<string, string> FavDirs
         {
@@ -542,22 +548,40 @@ namespace CaptureTool
         public void AddFavDir(string key, string value)
         {
             _FavDirs.Add(key, value);
-            RaisePropertyChanged();
-            RaisePropertyChanged(nameof(FavDirs));
+            _FavDirNames.Add(value);
+            RaisePropertyChanged(nameof(FavDirNames));
         }
 
         public void RemoveFavDir(string key)
         {
+            int index = _FavDirs.Keys.ToList().IndexOf(key);
             _FavDirs.Remove(key);
-            RaisePropertyChanged();
-            RaisePropertyChanged(nameof(FavDirs));
+            _FavDirNames.RemoveAt(index);
+            RaisePropertyChanged(nameof(FavDirNames));
+        }
+
+        public void RemoveFavDir(int index)
+        {
+            string key = _FavDirs.ElementAt(index).Key;
+            _FavDirs.Remove(key);
+            _FavDirNames.RemoveAt(index);
+            RaisePropertyChanged(nameof(FavDirNames));
         }
 
         public void ChangeFavDirName(string key, string value)
         {
+            int index = _FavDirs.Keys.ToList().IndexOf(key);
             _FavDirs[key] = value;
-            RaisePropertyChanged();
-            RaisePropertyChanged(nameof(FavDirs));
+            _FavDirNames[index] = value;
+            RaisePropertyChanged(nameof(FavDirNames));
+        }
+
+        public void ChangeFavDirName(int index, string value)
+        {
+            string key = _FavDirs.ElementAt(index).Key;
+            _FavDirs[key] = value;
+            _FavDirNames[index] = value;
+            RaisePropertyChanged(nameof(FavDirNames));
         }
 
         public string FileNameDirRegexConvert(string origStr, string dirName)

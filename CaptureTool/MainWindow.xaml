@@ -86,7 +86,7 @@
                 <TextBlock x:Name="SaveFolderLabel" Text="保存フォルダ" MouseLeftButtonUp="SaveFolderLabel_MouseLeftButtonUp"/>
                 <Button x:Name="openFolderButton" Content="保存先を開く" Margin="10,0,0,0" Click="OpenFolderButton_Click"/>
                 <Button x:Name="parentFolderButton" Content="親フォルダ" Margin="10,0,0,0" Click="ParentFolderButton_Click"/>
-                <ComboBox x:Name="favcombo" Margin="10,0,0,0" ItemsSource="{Binding FavDirs}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+                <ComboBox x:Name="favcombo" Margin="10,0,0,0" ItemsSource="{Binding FavDirNames}"/>
                 <Button x:Name="setFromFavDir" Content="適用" Click="setFromFavDir_Click"/>
                 <Button x:Name="chgFavDirNameButton" Content="名前変更" Click="chgFavDirNameButton_Click"/>
                 <Button x:Name="addFavDirButton" Content="＋" Click="AddFavDirButton_Click"/>
