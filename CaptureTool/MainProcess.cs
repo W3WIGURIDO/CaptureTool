@@ -290,14 +290,7 @@ namespace CaptureTool
                 }
 
                 Bitmap bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat);
-                //ImageCodecInfo codecInfo = null;
-                //foreach(ImageCodecInfo tmpInfo in ImageCodecInfo.GetImageEncoders())
-                //{
-                //    if (tmpInfo.FormatID == ImageFormat.Png.Guid)
-                //    {
 
-                //    }
-                //}
                 if (File.Exists(fileName))
                 {
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
@@ -320,7 +313,8 @@ namespace CaptureTool
 
                 if (imageFormat == ImageFormat.Png)
                 {
-                    ImageCompression.SavePng(fileName, bitmap, 9);
+                    bitmap.Save(fileName, imageFormat);
+                    //ImageCompression.SavePng(fileName, bitmap, 9);
                 }
                 else
                 {

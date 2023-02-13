@@ -44,9 +44,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aspose.Imaging, Version=22.12.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
-      <HintPath>..\packages\Aspose.Imaging.22.12.0\lib\net40\Aspose.Imaging.dll</HintPath>
-    </Reference>
     <Reference Include="DesktopDuplication, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\desktop-duplication\desktop-duplication-net-master\DesktopDuplication\bin\Release\DesktopDuplication.dll</HintPath>
