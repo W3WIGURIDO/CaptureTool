@@ -317,7 +317,15 @@ namespace CaptureTool
                 {
                     imageFormat = ImageFormat.Png;
                 }
-                bitmap.Save(fileName, imageFormat);
+
+                if (imageFormat == ImageFormat.Png)
+                {
+                    ImageCompression.SavePng(fileName, bitmap, 9);
+                }
+                else
+                {
+                    bitmap.Save(fileName, imageFormat);
+                }
                 ImageSource imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
                 if (enableOverlay)
                 {
