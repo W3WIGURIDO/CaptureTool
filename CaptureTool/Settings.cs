@@ -584,6 +584,16 @@ namespace CaptureTool
             RaisePropertyChanged(nameof(FavDirNames));
         }
 
+        private string ToStringFavDirKeys()
+        {
+            return string.Join("\n", _FavDirs.Keys);
+        }
+
+        private string ToStringFavDirValues()
+        {
+            return string.Join("\n", _FavDirs.Values);
+        }
+
         public string FileNameDirRegexConvert(string origStr, string dirName)
         {
             string tmpStr = origStr;
@@ -714,6 +724,23 @@ namespace CaptureTool
                 EnableChangeCapture = GetBoolFromString(nameof(EnableChangeCapture), false);
                 EnableSetArrow = GetBoolFromString(nameof(EnableSetArrow), false);
                 EnableVisibilityControl = GetBoolFromString(nameof(EnableVisibilityControl), true);
+
+                string[] GetArrayFromString(string name, string[] defaultList, string separator)
+                {
+                    string tmpStr = tmpel.Element(name)?.Value;
+                    if (string.IsNullOrEmpty(tmpStr))
+                    {
+                        return defaultList;
+                    }
+                    else
+                    {
+                        return tmpStr.Split(new string[] { separator }, StringSplitOptions.RemoveEmptyEntries);
+                    }
+                }
+                string[] keys = GetArrayFromString("FavDirKeys", new string[0], "\n");
+                string[] values = GetArrayFromString("FavDirValues", new string[0], "\n");
+                _FavDirs = keys.ToDictionary(key => key, key => values[Array.IndexOf(keys, key)]);
+                _FavDirNames = new System.Collections.ObjectModel.ObservableCollection<string>(values);
             }
             else
             {
@@ -749,7 +776,9 @@ namespace CaptureTool
                 new XElement(nameof(PixelFormatIndex), PixelFormatIndex.ToString()),
                 new XElement(nameof(CaptureModeIndex), CaptureModeIndex.ToString()),
                 new XElement(nameof(EnableVisibilityControl), EnableVisibilityControl.ToString()),
-                new XElement(nameof(CountConju), CountConju)
+                new XElement(nameof(CountConju), CountConju),
+                new XElement("FavDirKeys", ToStringFavDirKeys()),
+                new XElement("FavDirValues", ToStringFavDirValues())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);

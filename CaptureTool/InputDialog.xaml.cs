@@ -23,11 +23,17 @@ namespace CaptureTool
     {
         InputDialogContext inputDialogContext;
         string inputedText = null;
-        public InputDialog(string windowName, string textMessage, string buttonMessage, string boxText)
+        public InputDialog(string windowName, string textMessage, string buttonMessage, string boxText, Window owner = null)
         {
             inputDialogContext = new InputDialogContext(windowName, textMessage, buttonMessage, boxText);
             this.DataContext = inputDialogContext;
             InitializeComponent();
+            if (owner != null)
+            {
+                Owner = owner;
+                Left = Owner.Left + Owner.Width / 2 - Width / 2;
+                Top = Owner.Top + Owner.Height / 2 - Height / 2;
+            }
         }
 
         public new string ShowDialog()

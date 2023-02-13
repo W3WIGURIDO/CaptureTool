@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CaptureTool"
         mc:Ignorable="d"
-        Title="{Binding TitleName}" Height="150" Width="300">
+        Title="{Binding WindowName}" Height="100" Width="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

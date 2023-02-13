@@ -475,14 +475,17 @@ namespace CaptureTool
 
         private void RemoveFavDirButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (favcombo.SelectedIndex >= 0)
             {
-                settings.RemoveFavDir(favcombo.SelectedIndex);
-                favcombo.SelectedIndex = -1;
-            }
-            catch (Exception ex)
-            {
-                WpfFolderBrowser.CustomMessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, "メッセージ");
+                try
+                {
+                    settings.RemoveFavDir(favcombo.SelectedIndex);
+                    favcombo.SelectedIndex = -1;
+                }
+                catch (Exception ex)
+                {
+                    WpfFolderBrowser.CustomMessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, "メッセージ");
+                }
             }
         }
 
@@ -498,10 +501,14 @@ namespace CaptureTool
         {
             if (favcombo.SelectedIndex >= 0)
             {
+                int selectedIndex = favcombo.SelectedIndex;
                 string favdirName;
-                favdirName = new InputDialog("名前変更", "新しい名前を入力", "決定", settings.FavDirNames.ElementAt(favcombo.SelectedIndex)).ShowDialog();
+                favdirName = new InputDialog("名前変更", "新しい名前を入力", "決定", settings.FavDirNames.ElementAt(selectedIndex), this).ShowDialog();
                 if (!string.IsNullOrEmpty(favdirName))
+                {
                     settings.ChangeFavDirName(favcombo.SelectedIndex, favdirName);
+                    favcombo.SelectedIndex = selectedIndex;
+                }
             }
         }
     }
