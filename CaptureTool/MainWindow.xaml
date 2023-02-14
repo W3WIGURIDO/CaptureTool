@@ -76,11 +76,15 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="保存形式" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <ComboBox x:Name="imageFormatSelect" SelectedIndex="{Binding SaveFormatIndex}" Grid.Column="1" VerticalAlignment="Center" Width="100" HorizontalAlignment="Left" ItemsSource="{Binding SaveFormats}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+                <ComboBox x:Name="imageFormatSelect" SelectedIndex="{Binding SaveFormatIndex}" Grid.Column="1" VerticalAlignment="Center" Width="80" HorizontalAlignment="Left" ItemsSource="{Binding SaveFormats}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
                 <TextBlock Text="ピクセル形式" VerticalAlignment="Center" Margin="15,0,5,0" Grid.Column="2"/>
                 <ComboBox x:Name="pixelFormatSelect" SelectedIndex="{Binding PixelFormatIndex}" Grid.Column="3" VerticalAlignment="Center" Width="100" HorizontalAlignment="Left" ItemsSource="{Binding PixelFormats}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+                <TextBlock Text="圧縮" VerticalAlignment="Center" Margin="15,0,5,0" Grid.Column="4" ToolTip="数値が高いほど高圧縮かつ処理に時間がかかります。"/>
+                <ComboBox x:Name="compressSelect" SelectedIndex="{Binding CompressIndex}" Grid.Column="5" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" ItemsSource="{Binding CompressNums}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
             </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <TextBlock x:Name="SaveFolderLabel" Text="保存フォルダ" MouseLeftButtonUp="SaveFolderLabel_MouseLeftButtonUp"/>

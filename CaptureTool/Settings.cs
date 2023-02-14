@@ -594,6 +594,24 @@ namespace CaptureTool
             return string.Join("\n", _FavDirs.Values);
         }
 
+        private int _CompressIndex;
+        public int CompressIndex
+        {
+            get => _CompressIndex;
+            set
+            {
+                _CompressIndex = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CompressIndex));
+            }
+        }
+
+        private readonly Dictionary<string, string> _CompressNums = new Dictionary<string, string>() { { "-o0", "無し" }, { "-o1", "1" }, { "-o2", "2" }, { "-o3", "3" }, { "-o4", "4" }, { "-o5", "5" }, { "-o6", "6" }, { "-o7", "7" }, { "-o7 -zm1-9", "8" } };
+        public Dictionary<string, string> CompressNums
+        {
+            get => _CompressNums;
+        }
+
         public string FileNameDirRegexConvert(string origStr, string dirName)
         {
             string tmpStr = origStr;
@@ -703,6 +721,7 @@ namespace CaptureTool
                 OverlayY = GetIntFromString(nameof(OverlayY), 150);
                 PixelFormatIndex = GetIntFromString(nameof(PixelFormatIndex), 0);
                 CaptureModeIndex = GetIntFromString(nameof(CaptureModeIndex), 1);
+                CompressIndex = GetIntFromString(nameof(CompressIndex), 0);
 
                 bool GetBoolFromString(string name, bool defaultBool)
                 {
@@ -778,7 +797,8 @@ namespace CaptureTool
                 new XElement(nameof(EnableVisibilityControl), EnableVisibilityControl.ToString()),
                 new XElement(nameof(CountConju), CountConju),
                 new XElement("FavDirKeys", ToStringFavDirKeys()),
-                new XElement("FavDirValues", ToStringFavDirValues())
+                new XElement("FavDirValues", ToStringFavDirValues()),
+                new XElement(nameof(CompressIndex), CompressIndex.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -808,6 +828,7 @@ namespace CaptureTool
             CaptureModeIndex = 1;
             EnableVisibilityControl = true;
             CountConju = "_";
+            CompressIndex = 0;
         }
     }
 
