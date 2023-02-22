@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="CaptureTool.Pages.CaptureSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CaptureTool.Pages"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <TextBlock Text="キャプチャ設定" FontWeight="Bold" Margin="0,2,0,0"/>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="キャプチャ方式切り替え"/>
+            <ComboBox x:Name="captureModeSelect" SelectedIndex="{Binding CaptureModeIndex}" Grid.Column="1" VerticalAlignment="Center" Width="150" HorizontalAlignment="Left" ItemsSource="{Binding CaptureModes}" SelectedValuePath="Key" DisplayMemberPath="Value" Margin="5,0,0,0"/>
+        </StackPanel>
+        <WrapPanel Orientation="{Binding DefaultOrientation}">
+            <CheckBox x:Name="enableAeroBox" Grid.Column="3" IsChecked="{Binding EnableAero}" VerticalAlignment="Center" Margin="0,0,15,0" IsEnabled="{Binding DisableAero}" Content="Aero対応"/>
+            <CheckBox Grid.Column="1" IsChecked="{Binding EnableCursor}" VerticalAlignment="Center" Margin="0,0,15,0" Content="マウスカーソルをキャプチャ"/>
+            <CheckBox IsEnabled="{Binding EnableCursor}" IsChecked="{Binding EnableSetArrow}" Content="カーソルアイコンを矢印に固定"/>
+        </WrapPanel>
+    </StackPanel>
+</UserControl>

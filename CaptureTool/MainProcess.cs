@@ -237,7 +237,7 @@ namespace CaptureTool
         private const string FormatText = "Text";
         private static string tempPath = Path.GetTempPath();
 
-        public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb, string compressOption = "-o0")
+        public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb, int compressMode = 0, string compressOption = "")
         {
             const string WordWindowTitle = "<WindowTitle>";
             const string DesktopText = "Desktop";
@@ -314,11 +314,22 @@ namespace CaptureTool
 
                 if (imageFormat == ImageFormat.Png)
                 {
-                    bitmap.Save(fileName, imageFormat);
-                    if (compressOption != "-o0")
+                    if (compressMode == 1)
                     {
+                        bitmap.Save(fileName, imageFormat);
                         ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "optipng.exe", fileName + " " + compressOption) { WindowStyle = ProcessWindowStyle.Minimized };
                         Process.Start(compressStartInfo);
+                    }
+                    else if (compressMode == 2)
+                    {
+                        string tmpName = tempPath + "CaptureToolTmpFile.png";
+                        bitmap.Save(tmpName, imageFormat);
+                        ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "zopflipng.exe", compressOption + " " + tmpName + " " + fileName) { WindowStyle = ProcessWindowStyle.Minimized };
+                        Process.Start(compressStartInfo);
+                    }
+                    else
+                    {
+                        bitmap.Save(fileName, imageFormat);
                     }
                 }
                 else

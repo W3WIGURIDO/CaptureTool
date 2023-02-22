@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="CaptureTool.Pages.SaveDir"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CaptureTool.Pages"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="保存先設定" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+            <TextBlock x:Name="SaveFolderLabel" Text="保存フォルダ" MouseLeftButtonUp="SaveFolderLabel_MouseLeftButtonUp"/>
+            <Button x:Name="openFolderButton" Content="保存先を開く" Margin="10,0,0,0" Click="OpenFolderButton_Click"/>
+            <Button x:Name="parentFolderButton" Content="親フォルダ" Margin="10,0,0,0" Click="ParentFolderButton_Click"/>
+            <ComboBox x:Name="favcombo" Margin="10,0,0,0" ItemsSource="{Binding FavDirNames}"/>
+            <Button x:Name="setFromFavDir" Content="適用" Click="setFromFavDir_Click"/>
+            <Button x:Name="chgFavDirNameButton" Content="名前変更" Click="chgFavDirNameButton_Click"/>
+            <Button x:Name="addFavDirButton" Content="＋" Click="AddFavDirButton_Click"/>
+            <Button x:Name="removeFavDirButton" Content="－" Click="RemoveFavDirButton_Click"/>
+        </StackPanel>
+        <Grid Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="saveFolder" Text="{Binding Directory,UpdateSourceTrigger=PropertyChanged}" TextChanged="SaveFolder_TextChanged"/>
+            <Button Content="参照(R)" Margin="5,0,0,0" Grid.Column="1" Click="ClickRef" Focusable="False"/>
+        </Grid>
+        <StackPanel Orientation="Horizontal" x:Name="folderCountButtonPanel"/>
+        <Grid Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="fileNameLabel" Text="ファイル名" MouseLeftButtonUp="fileNameLabel_MouseLeftButtonUp"/>
+            <TextBox x:Name="fileNameBox" Grid.Column="1" Text="{Binding FileName,UpdateSourceTrigger=PropertyChanged}" TextChanged="FileNameBox_TextChanged"/>
+        </Grid>
+        <StackPanel Orientation="Horizontal" x:Name="countButtonPanel"/>
+        <Grid Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="連番付加"/>
+            <CheckBox Grid.Column="1" IsChecked="{Binding EnableNumber}"/>
+            <TextBlock Text="桁数" Grid.Column="2" Margin="5,0,0,0"/>
+            <TextBox x:Name="digitsTextBox" Grid.Column="3" Text="{Binding DigitsText}" TextChanged="DigitsTextBox_TextChanged" MinWidth="30"/>
+            <TextBlock Text="カウント：" Grid.Column="4" Margin="5,0,0,0"/>
+            <TextBox x:Name="countTextBox" Grid.Column="5" Text="{Binding NumberCount}" MinWidth="30" TextChanged="CountTextBox_TextChanged"/>
+            <StackPanel Grid.Column="6" Margin="0,0,1,0">
+                <Button x:Name="countUpButton" FontSize="5" MinWidth="20" Click="CountUpButton_Click">
+                    <Button.Content>
+                        <TextBlock Text="▲" RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform ScaleX="3.5" ScaleY="1.3"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button x:Name="countDownButton" FontSize="5" MinWidth="20" Click="CountDownButton_Click">
+                    <Button.Content>
+                        <TextBlock Text="▼" RenderTransformOrigin="0.5,1">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform ScaleX="3.5" ScaleY="1.3"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+            <Button Content="リセット" Grid.Column="7" Click="NumberResetClick"/>
+            <Button x:Name="continueButton" Content="続行" Grid.Column="8" Click="ContinueButton_Click"/>
+            <TextBlock Text="接続語：" Grid.Column="9" Margin="5,0,0,0"/>
+            <TextBox Grid.Column="10" Text="{Binding CountConju}" MinWidth="30"/>
+        </Grid>
+        <Grid Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="次回保存ファイル名："/>
+            <TextBlock Text="{Binding SampleFileName}" Margin="5,0,0,0" Grid.Column="1" TextWrapping="Wrap"/>
+        </Grid>
+        <StackPanel Visibility="{Binding EnableOptionFileNameOption,Converter={StaticResource BoolVisibilityConverter}}">
+            <TextBlock Text="ファイル名オプション"/>
+            <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名"/>
+        </StackPanel>
+    </StackPanel>
+
+</UserControl>

@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="CaptureTool.MainInstance"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CaptureTool"
+             xmlns:pages="clr-namespace:CaptureTool.Pages"
+             mc:Ignorable="d" 
+             >
+    <!--BooleanToVisibilityConverterを使えるようにする-->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Button x:Name="InvisibleButton" Background="Transparent" BorderBrush="Transparent" Opacity="0" GotFocus="InvisibleButton_GotFocus"/>
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="0.35*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="saveButton" Content="設定保存" Click="ClickSave"/>
+                <Button x:Name="instanceSettingButton" Content="詳細設定(個別)" Click="instanceSettingButton_Click" Grid.Column="1"/>
+                <Button Content="設定リセット" Click="ClickReset" Grid.Column="2"/>
+            </Grid>
+            <pages:KeyBind Visibility="{Binding EnableViewKeyBind,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:KeyBindingViewer Visibility="{Binding EnableViewKeyBindingViewer,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:SaveFormat Visibility="{Binding EnableViewSaveFormat,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:SaveDir x:Name="saveDirGrid" Visibility="{Binding EnableViewSaveDir,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:Overlay Visibility="{Binding EnableViewOverlay,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:CaptureSetting Visibility="{Binding EnableViewCapture,Converter={StaticResource BoolVisibilityConverter}}"/>
+            <pages:Other Visibility="{Binding EnableViewOther,Converter={StaticResource BoolVisibilityConverter}}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

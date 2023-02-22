@@ -89,7 +89,6 @@ namespace CaptureTool
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            MainWindow.ActiveWindow.ReturnFromMiniMode();
         }
 
         private void ContinueButton_Click(object sender, RoutedEventArgs e)

@@ -17,7 +17,7 @@ namespace CaptureTool
         private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Capture";
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        public void RaisePropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         private Keys _Key;
@@ -27,9 +27,8 @@ namespace CaptureTool
             set
             {
                 _Key = value;
-                _KeyText = Enum.GetName(typeof(Keys), value);
+                KeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(KeyText));
             }
         }
 
@@ -40,9 +39,8 @@ namespace CaptureTool
             set
             {
                 _PreKey = value;
-                _PreKeyText = Enum.GetName(typeof(Keys), value);
+                PreKeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(PreKeyText));
             }
         }
 
@@ -50,12 +48,22 @@ namespace CaptureTool
         public string KeyText
         {
             get => _KeyText;
+            set
+            {
+                _KeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private string _PreKeyText;
         public string PreKeyText
         {
             get => _PreKeyText;
+            set
+            {
+                _PreKeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private Keys _ScreenKey;
@@ -65,9 +73,8 @@ namespace CaptureTool
             set
             {
                 _ScreenKey = value;
-                _ScreenKeyText = Enum.GetName(typeof(Keys), value);
+                ScreenKeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(ScreenKeyText));
             }
         }
 
@@ -78,9 +85,8 @@ namespace CaptureTool
             set
             {
                 _ScreenPreKey = value;
-                _ScreenPreKeyText = Enum.GetName(typeof(Keys), value);
+                ScreenPreKeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(ScreenPreKeyText));
             }
         }
 
@@ -88,12 +94,22 @@ namespace CaptureTool
         public string ScreenKeyText
         {
             get => _ScreenKeyText;
+            set
+            {
+                _ScreenKeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private string _ScreenPreKeyText;
         public string ScreenPreKeyText
         {
             get => _ScreenPreKeyText;
+            set
+            {
+                _ScreenPreKeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private Keys _SelectKey;
@@ -103,9 +119,8 @@ namespace CaptureTool
             set
             {
                 _SelectKey = value;
-                _SelectKeyText = Enum.GetName(typeof(Keys), value);
+                SelectKeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(SelectKeyText));
             }
         }
 
@@ -116,9 +131,8 @@ namespace CaptureTool
             set
             {
                 _SelectPreKey = value;
-                _SelectPreKeyText = Enum.GetName(typeof(Keys), value);
+                SelectPreKeyText = Enum.GetName(typeof(Keys), value);
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(SelectPreKeyText));
             }
         }
 
@@ -126,12 +140,22 @@ namespace CaptureTool
         public string SelectKeyText
         {
             get => _SelectKeyText;
+            set
+            {
+                _SelectKeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private string _SelectPreKeyText;
         public string SelectPreKeyText
         {
             get => _SelectPreKeyText;
+            set
+            {
+                _SelectPreKeyText = value;
+                RaisePropertyChanged();
+            }
         }
 
         private string _Directory;
@@ -497,16 +521,6 @@ namespace CaptureTool
             get => _CaptureModes;
         }
 
-        private RoutedCommand _RefFolderCom = new RoutedCommand();
-        public RoutedCommand RefFolderCom
-        {
-            get => _RefFolderCom;
-            set
-            {
-                _RefFolderCom = value;
-            }
-        }
-
         private bool? _EnableVisibilityControl;
         public bool? EnableVisibilityControl
         {
@@ -606,11 +620,150 @@ namespace CaptureTool
             }
         }
 
-        private readonly Dictionary<string, string> _CompressNums = new Dictionary<string, string>() { { "-o0", "無し" }, { "-o1", "1" }, { "-o2", "2" }, { "-o3", "3" }, { "-o4", "4" }, { "-o5", "5" }, { "-o6", "6" }, { "-o7", "7" }, { "-o7 -zm1-9", "8" } };
+        private readonly Dictionary<string, string> _CompressNums = new Dictionary<string, string>() { { "-o1", "1" }, { "-o2", "2" }, { "-o3", "3" }, { "-o4", "4" }, { "-o5", "5" }, { "-o6", "6" }, { "-o7", "7" }, { "-o7 -zm1-9", "8" } };
         public Dictionary<string, string> CompressNums
         {
             get => _CompressNums;
         }
+
+        private int _CompressIndexZopfli;
+        public int CompressIndexZopfli
+        {
+            get => _CompressIndexZopfli;
+            set
+            {
+                _CompressIndexZopfli = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CompressIndexZopfli));
+            }
+        }
+
+        private readonly Dictionary<string, string> _CompressNumsZopfli = new Dictionary<string, string>() { { "", "1" }, { "--filters=0me", "2" }, { "--filters=01234me", "3" }, { "--filters=01234mepb", "4" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=0me", "5" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234me", "6" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234mepb", "7" } };
+        public Dictionary<string, string> CompressNumsZopfli
+        {
+            get => _CompressNumsZopfli;
+        }
+
+        private CompressType _CompressSelect;
+        public CompressType CompressSelect
+        {
+            get => _CompressSelect;
+            set
+            {
+                _CompressSelect = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CompressSelect));
+            }
+        }
+
+        public HotKeySettings HotKeySettings { get; set; }
+
+        public int TabNumber { get; set; }
+
+        public MainInstance OwnerInstance { get; set; }
+
+        private bool _TopMost = false;
+        public bool TopMost
+        {
+            get => _TopMost;
+            set
+            {
+                _TopMost = value;
+                RaisePropertyChanged();
+                MainWindow.GetMainWindowDataContext().RaisePropertyChanged(nameof(TopMost));
+            }
+        }
+
+        private bool? _EnableViewKeyBind;
+        public bool? EnableViewKeyBind
+        {
+            get => _EnableViewKeyBind;
+            set
+            {
+                _EnableViewKeyBind = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewKeyBindingViewer;
+        public bool? EnableViewKeyBindingViewer
+        {
+            get => _EnableViewKeyBindingViewer;
+            set
+            {
+                _EnableViewKeyBindingViewer = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewSaveFormat;
+        public bool? EnableViewSaveFormat
+        {
+            get => _EnableViewSaveFormat;
+            set
+            {
+                _EnableViewSaveFormat = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewSaveDir;
+        public bool? EnableViewSaveDir
+        {
+            get => _EnableViewSaveDir;
+            set
+            {
+                _EnableViewSaveDir = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewOverlay;
+        public bool? EnableViewOverlay
+        {
+            get => _EnableViewOverlay;
+            set
+            {
+                _EnableViewOverlay = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewCapture;
+        public bool? EnableViewCapture
+        {
+            get => _EnableViewCapture;
+            set
+            {
+                _EnableViewCapture = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableViewOther;
+        public bool? EnableViewOther
+        {
+            get => _EnableViewOther;
+            set
+            {
+                _EnableViewOther = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _EnableOptionFileNameOption;
+        public bool? EnableOptionFileNameOption
+        {
+            get => _EnableOptionFileNameOption;
+            set
+            {
+                _EnableOptionFileNameOption = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
+        public System.Windows.Controls.Orientation DefaultOrientation { get; set; } = System.Windows.Controls.Orientation.Horizontal;
 
         public string FileNameDirRegexConvert(string origStr, string dirName)
         {
@@ -657,9 +810,21 @@ namespace CaptureTool
             return tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
         }
 
-        const string SettingFile = "setting.xml";
-        public Settings()
+        private string SettingFile = "setting.xml";
+        const string SettingPreName = "setting";
+        const string SettingExtension = ".xml";
+        const string DefaultSettingName = "DefaultSetting.xml";
+        public Settings(int tabNumber)
         {
+            TabNumber = tabNumber;
+            if (tabNumber == -1)
+            {
+                SettingFile = DefaultSettingName;
+            }
+            else if (tabNumber > 0)
+            {
+                SettingFile = SettingPreName + tabNumber.ToString() + SettingExtension;
+            }
             string fullPath = AppDomain.CurrentDomain.BaseDirectory + SettingFile;
             if (System.IO.File.Exists(fullPath))
             {
@@ -722,6 +887,7 @@ namespace CaptureTool
                 PixelFormatIndex = GetIntFromString(nameof(PixelFormatIndex), 0);
                 CaptureModeIndex = GetIntFromString(nameof(CaptureModeIndex), 1);
                 CompressIndex = GetIntFromString(nameof(CompressIndex), 0);
+                CompressIndexZopfli = GetIntFromString(nameof(CompressIndexZopfli), 0);
 
                 bool GetBoolFromString(string name, bool defaultBool)
                 {
@@ -743,6 +909,15 @@ namespace CaptureTool
                 EnableChangeCapture = GetBoolFromString(nameof(EnableChangeCapture), false);
                 EnableSetArrow = GetBoolFromString(nameof(EnableSetArrow), false);
                 EnableVisibilityControl = GetBoolFromString(nameof(EnableVisibilityControl), true);
+                TopMost = GetBoolFromString(nameof(TopMost), false);
+                EnableViewKeyBind = GetBoolFromString(nameof(EnableViewKeyBind), true);
+                EnableViewKeyBindingViewer = GetBoolFromString(nameof(EnableViewKeyBindingViewer), false);
+                EnableViewSaveFormat = GetBoolFromString(nameof(EnableViewSaveFormat), false);
+                EnableViewSaveDir = GetBoolFromString(nameof(EnableViewSaveDir), true);
+                EnableViewOverlay = GetBoolFromString(nameof(EnableViewOverlay), false);
+                EnableViewCapture = GetBoolFromString(nameof(EnableViewCapture), false);
+                EnableViewOther = GetBoolFromString(nameof(EnableViewOther), false);
+                EnableOptionFileNameOption = GetBoolFromString(nameof(EnableOptionFileNameOption), false);
 
                 string[] GetArrayFromString(string name, string[] defaultList, string separator)
                 {
@@ -760,6 +935,20 @@ namespace CaptureTool
                 string[] values = GetArrayFromString("FavDirValues", new string[0], "\n");
                 _FavDirs = keys.ToDictionary(key => key, key => values[Array.IndexOf(keys, key)]);
                 _FavDirNames = new System.Collections.ObjectModel.ObservableCollection<string>(values);
+
+                T GetEnumFromString<T>(string name, T defaultEnum)
+                {
+                    try
+                    {
+                        string tmpStr = tmpel.Element(name)?.Value;
+                        return (T)Enum.Parse(typeof(T), tmpStr);
+                    }
+                    catch
+                    {
+                        return defaultEnum;
+                    }
+                }
+                CompressSelect = GetEnumFromString(nameof(CompressSelect), CompressType.None);
             }
             else
             {
@@ -798,7 +987,18 @@ namespace CaptureTool
                 new XElement(nameof(CountConju), CountConju),
                 new XElement("FavDirKeys", ToStringFavDirKeys()),
                 new XElement("FavDirValues", ToStringFavDirValues()),
-                new XElement(nameof(CompressIndex), CompressIndex.ToString())
+                new XElement(nameof(CompressIndex), CompressIndex.ToString()),
+                new XElement(nameof(CompressIndexZopfli), CompressIndexZopfli.ToString()),
+                new XElement(nameof(CompressSelect), Enum.GetName(typeof(CompressType), CompressSelect)),
+                new XElement(nameof(TopMost), TopMost.ToString()),
+                new XElement(nameof(EnableViewKeyBind), EnableViewKeyBind.ToString()),
+                new XElement(nameof(EnableViewKeyBindingViewer), EnableViewKeyBindingViewer.ToString()),
+                new XElement(nameof(EnableViewSaveFormat), EnableViewSaveFormat.ToString()),
+                new XElement(nameof(EnableViewSaveDir), EnableViewSaveDir.ToString()),
+                new XElement(nameof(EnableViewOverlay), EnableViewOverlay.ToString()),
+                new XElement(nameof(EnableViewCapture), EnableViewCapture.ToString()),
+                new XElement(nameof(EnableViewOther), EnableViewOther.ToString()),
+                new XElement(nameof(EnableOptionFileNameOption), EnableOptionFileNameOption.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -819,16 +1019,29 @@ namespace CaptureTool
             OverlayTime = "3000";
             ScreenKey = Keys.Q;
             ScreenPreKey = Keys.Alt;
+            SelectKey = Keys.S;
+            SelectPreKey = Keys.Alt;
             EnableCursor = false;
             EnableChangeCapture = false;
             OverlayX = 200;
             OverlayY = 150;
             EnableSetArrow = false;
-            PixelFormatIndex = 0;
+            PixelFormatIndex = 1;
             CaptureModeIndex = 1;
             EnableVisibilityControl = true;
             CountConju = "_";
             CompressIndex = 0;
+            EnableAutoSave = true;
+            EnableAero = true;
+            TopMost = false;
+            EnableViewKeyBind = false;
+            EnableViewKeyBindingViewer = true;
+            EnableViewSaveFormat = false;
+            EnableViewSaveDir = true;
+            EnableViewOverlay = false;
+            EnableViewCapture = false;
+            EnableViewOther = false;
+            EnableOptionFileNameOption = false;
         }
     }
 
@@ -846,5 +1059,10 @@ namespace CaptureTool
             this.HorizontalAlignment = horizontalAlignment;
             this.VerticalAlignment = verticalAlignment;
         }
+    }
+
+    public enum CompressType
+    {
+        None, Optipng, Zopfli
     }
 }

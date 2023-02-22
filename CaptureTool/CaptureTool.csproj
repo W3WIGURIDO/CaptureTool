@@ -81,7 +81,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extend.cs" />
-    <Compile Include="ImageCompression.cs" />
+    <Compile Include="HotKeySettings.cs" />
     <Compile Include="InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
@@ -91,6 +91,10 @@
     <Compile Include="KeyInputForm.Designer.cs">
       <DependentUpon>KeyInputForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainInstance.xaml.cs">
+      <DependentUpon>MainInstance.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindowDataContext.cs" />
     <Compile Include="MiniWindow.xaml.cs">
       <DependentUpon>MiniWindow.xaml</DependentUpon>
     </Compile>
@@ -106,9 +110,41 @@
     <Compile Include="OverlayWindow.xaml.cs">
       <DependentUpon>OverlayWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\CaptureSetting.xaml.cs">
+      <DependentUpon>CaptureSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\EnumToBooleanConverter.cs" />
+    <Compile Include="Pages\KeyBind.xaml.cs">
+      <DependentUpon>KeyBind.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\KeyBindingViewer.xaml.cs">
+      <DependentUpon>KeyBindingViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Other.xaml.cs">
+      <DependentUpon>Other.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Overlay.xaml.cs">
+      <DependentUpon>Overlay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SaveDir.xaml.cs">
+      <DependentUpon>SaveDir.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SaveFormat.xaml.cs">
+      <DependentUpon>SaveFormat.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\UISetting.xaml.cs">
+      <DependentUpon>UISetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="SettingWindow.xaml.cs">
+      <DependentUpon>SettingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VisibilityAnimation.cs" />
     <Page Include="InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainInstance.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -137,6 +173,42 @@
     <Page Include="OverlayWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\CaptureSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\KeyBind.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\KeyBindingViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Other.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Overlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SaveDir.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SaveFormat.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\UISetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

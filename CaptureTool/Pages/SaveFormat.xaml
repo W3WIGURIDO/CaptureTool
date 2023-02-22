@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="CaptureTool.Pages.SaveFormat"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CaptureTool.Pages"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <local:EnumToBooleanConverter x:Key="EnumToBoolean"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="保存形式設定" FontWeight="Bold"/>
+        <Grid Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="保存形式" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox x:Name="imageFormatSelect" SelectedIndex="{Binding SaveFormatIndex}" Grid.Column="1" VerticalAlignment="Center" Width="80" HorizontalAlignment="Left" ItemsSource="{Binding SaveFormats}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+            <TextBlock Text="ピクセル形式" VerticalAlignment="Center" Margin="15,0,5,0" Grid.Column="2"/>
+            <ComboBox x:Name="pixelFormatSelect" SelectedIndex="{Binding PixelFormatIndex}" Grid.Column="3" VerticalAlignment="Center" Width="100" HorizontalAlignment="Left" ItemsSource="{Binding PixelFormats}" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+        </Grid>
+        <TextBlock Text="Png圧縮設定"/>
+        <WrapPanel Orientation="{Binding DefaultOrientation}">
+            <RadioButton GroupName="compressRadio" Margin="0,0,40,4" IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=None,UpdateSourceTrigger=PropertyChanged}">
+                <RadioButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="無し" VerticalAlignment="Center" ToolTip="圧縮を行いません。" Margin="2,0"/>
+                    </StackPanel>
+                </RadioButton.Content>
+            </RadioButton>
+            <RadioButton x:Name="optiCheck" GroupName="compressRadio" Margin="0,0,40,4" IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=Optipng,UpdateSourceTrigger=PropertyChanged}">
+                <RadioButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Optipng" VerticalAlignment="Center" ToolTip="数値が高いほど高圧縮かつ処理に時間がかかります。" Margin="2,0" Width="60"/>
+                        <ComboBox x:Name="compressSelect" SelectedIndex="{Binding CompressIndex}" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" ItemsSource="{Binding CompressNums}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsChecked,ElementName=optiCheck}"/>
+                    </StackPanel>
+                </RadioButton.Content>
+            </RadioButton>
+            <RadioButton x:Name="zopCheck" GroupName="compressRadio" Margin="0,0,0,4" IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=Zopfli,UpdateSourceTrigger=PropertyChanged}">
+                <RadioButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Zopfli" VerticalAlignment="Center" ToolTip="数値が高いほど高圧縮かつ処理に時間がかかります。" Margin="2,0" Width="60"/>
+                        <ComboBox x:Name="compressSelectZopfli" SelectedIndex="{Binding CompressIndexZopfli}" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" ItemsSource="{Binding CompressNumsZopfli}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsChecked,ElementName=zopCheck}"/>
+                    </StackPanel>
+                </RadioButton.Content>
+            </RadioButton>
+        </WrapPanel>
+    </StackPanel>
+
+</UserControl>
