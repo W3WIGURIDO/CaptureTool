@@ -36,6 +36,22 @@ namespace CaptureTool
         public void AddTab(int index)
         {
             MainInstance mainInstance = new MainInstance(index);
+            foreach (MainInstance otherInstance in UserControls)
+            {
+                if (otherInstance.settings.ContainsHotKeyPair(mainInstance.settings.PreKey, mainInstance.settings.Key))
+                {
+                    mainInstance.settings.WindowCaptureEnabled = false;
+                }
+                if (otherInstance.settings.ContainsHotKeyPair(mainInstance.settings.ScreenPreKey, mainInstance.settings.ScreenKey))
+                {
+                    mainInstance.settings.ScreenCaptureEnabled = false;
+                }
+                if (otherInstance.settings.ContainsHotKeyPair(mainInstance.settings.SelectPreKey, mainInstance.settings.SelectKey))
+                {
+                    mainInstance.settings.SelectEnabled = false;
+                }
+            }
+            mainInstance.settings.HotKeySettings.StartHotKey();
             UserControls.Add(mainInstance);
 
             TabItem tabItem = new TabItem();
@@ -53,6 +69,7 @@ namespace CaptureTool
             tabItem.Content = mainInstance;
             tabItem.Header = stackPanel;
             TabItems.Add(tabItem);
+            LastTabNumber = index;
         }
 
         public void RemoveTab(MainInstance mainInstance, TabItem tabItem)
@@ -62,7 +79,21 @@ namespace CaptureTool
             mainInstance.settings.HotKeySettings.DisposeHotKeys();
         }
 
+        private List<System.Windows.Window> _TabWindows = new List<System.Windows.Window>();
+        public List<System.Windows.Window> TabWindows => _TabWindows;
+
+        public void ViewWindowTab()
+        {
+            var mainInstance = UserControls[TabSelectedIndex];
+            TabWindow tabWindow = new TabWindow(mainInstance);
+            TabItems.RemoveAt(TabSelectedIndex);
+            TabWindows.Add(tabWindow);
+            tabWindow.Show();
+        }
+
         public int TabSelectedIndex { get; set; }
         public RoutedCommand RefFolderCom { get; set; } = new RoutedCommand();
+
+        public int LastTabNumber { get; set; } = 0;
     }
 }

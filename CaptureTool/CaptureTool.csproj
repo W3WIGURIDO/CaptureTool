@@ -139,6 +139,9 @@
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TabWindow.xaml.cs">
+      <DependentUpon>TabWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VisibilityAnimation.cs" />
     <Page Include="InputDialog.xaml">
       <SubType>Designer</SubType>
@@ -207,6 +210,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TabWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

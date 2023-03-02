@@ -15,6 +15,9 @@ namespace CaptureTool
         public event EventHandler HotKeyPush;
         public string HotKeyName { get; set; }
 
+        private bool _Disposed = false;
+        public bool Disposed => _Disposed;
+
         public HotKey(MOD_KEY modKey, Keys key)
         {
             form = new HotKeyForm(modKey, key, raiseHotKeyPush);
@@ -31,6 +34,17 @@ namespace CaptureTool
         public void Dispose()
         {
             form.Dispose();
+            _Disposed = true;
+        }
+
+        public bool TryDispose()
+        {
+            if (!Disposed)
+            {
+                Dispose();
+                return true;
+            }
+            return false;
         }
 
         private class HotKeyForm : Form

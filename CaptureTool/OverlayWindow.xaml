@@ -27,9 +27,14 @@
                 </Viewbox>
             </Grid>
             <Grid>
-                <TextBlock Text="スクリーンショット取得" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="スクリーンショット取得" FontWeight="Bold" Foreground="White" Margin="2,2,0,0"/>
-                <TextBlock Text="スクリーンショット取得" FontWeight="Bold" Margin="1,1,0,0"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid Background="Black" Opacity="0.7"/>
+                <TextBlock Text="{Binding OverlayText}" FontWeight="Bold" Foreground="White"/>
             </Grid>
         </Grid>
     </Grid>

@@ -231,19 +231,6 @@ namespace CaptureTool
             Task.Run(() =>
             {
                 Thread.Sleep(OverlayTime);
-                //bool isContinue = true;
-                //while (isContinue)
-                //{
-                //    gridView.Dispatcher.Invoke(() =>
-                //    {
-                //        gridView.Opacity = gridView.Opacity - 0.1;
-                //        if (gridView.Opacity <= 0)
-                //        {
-                //            isContinue = false;
-                //        }
-                //    });
-                //    Thread.Sleep(100);
-                //}
                 Dispatcher.Invoke(() => { OpacityAnimation(); });
                 Thread.Sleep(1000);
                 if (ClosingReady)
@@ -275,6 +262,28 @@ namespace CaptureTool
 
             // アニメーションを開始します
             storyboard.Begin();
+        }
+    }
+
+    public class OverlayWindowDataContext : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        private string _OverlayText = "スクリーンショット取得";
+        public string OverlayText
+        {
+            get => _OverlayText;
+            set
+            {
+                if (value != null)
+                {
+                    _OverlayText = value;
+                    RaisePropertyChanged();
+                }
+            }
         }
     }
 }

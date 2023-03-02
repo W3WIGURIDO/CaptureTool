@@ -158,6 +158,63 @@ namespace CaptureTool
             }
         }
 
+        private bool _WindowCaptureEnabled;
+        public bool WindowCaptureEnabled
+        {
+            get => _WindowCaptureEnabled;
+            set
+            {
+                var preVal = _WindowCaptureEnabled;
+                _WindowCaptureEnabled = value;
+                RaisePropertyChanged();
+                if (preVal != _WindowCaptureEnabled)
+                {
+                    HotKeySettings?.ResetWindowHotKey();
+                }
+            }
+        }
+
+        private bool _ScreenCaptureEnabled;
+        public bool ScreenCaptureEnabled
+        {
+            get => _ScreenCaptureEnabled;
+            set
+            {
+                var preVal = _ScreenCaptureEnabled;
+                _ScreenCaptureEnabled = value;
+                RaisePropertyChanged();
+                if (preVal != _ScreenCaptureEnabled)
+                {
+                    HotKeySettings?.ResetScreenHotKey();
+                }
+            }
+        }
+
+        private bool _SelectEnabled;
+        public bool SelectEnabled
+        {
+            get => _SelectEnabled;
+            set
+            {
+                var preVal = _SelectEnabled;
+                _SelectEnabled = value;
+                RaisePropertyChanged();
+                if (preVal != _SelectEnabled)
+                {
+                    HotKeySettings?.ResetSelectHotKey();
+                }
+            }
+        }
+
+        public bool ContainsHotKeyPair(Keys preKey, Keys key)
+        {
+            if ((preKey == PreKey && key == Key) || (preKey == ScreenPreKey && key == ScreenKey) || (preKey == SelectPreKey && key == SelectKey))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private string _Directory;
         public string Directory
         {
@@ -342,7 +399,6 @@ namespace CaptureTool
                     _OverlayTime = 3000.ToString();
                 }
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(OverlayTime));
                 RaisePropertyChanged(nameof(OverlayTimeInt));
             }
         }
@@ -361,7 +417,6 @@ namespace CaptureTool
             {
                 _PositionIndex = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(PositionIndex));
             }
         }
 
@@ -376,6 +431,28 @@ namespace CaptureTool
             get => _ViewPosition;
         }
 
+        private bool? _OverlayTabNameEnabled;
+        public bool? OverlayTabNameEnabled
+        {
+            get => _OverlayTabNameEnabled;
+            set
+            {
+                _OverlayTabNameEnabled = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool? _OverlayFileNameEnabled;
+        public bool? OverlayFileNameEnabled
+        {
+            get => _OverlayFileNameEnabled;
+            set
+            {
+                _OverlayFileNameEnabled = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private bool? _EnableAero;
         public bool? EnableAero
         {
@@ -384,7 +461,6 @@ namespace CaptureTool
             {
                 _EnableAero = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableAero));
             }
         }
 
@@ -396,7 +472,6 @@ namespace CaptureTool
             {
                 _EnableAutoSave = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableAutoSave));
             }
         }
 
@@ -408,7 +483,6 @@ namespace CaptureTool
             {
                 _WindowOpacity = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(WindowOpacity));
             }
         }
 
@@ -420,7 +494,6 @@ namespace CaptureTool
             {
                 _EnableCursor = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableCursor));
             }
         }
 
@@ -918,6 +991,11 @@ namespace CaptureTool
                 EnableViewCapture = GetBoolFromString(nameof(EnableViewCapture), false);
                 EnableViewOther = GetBoolFromString(nameof(EnableViewOther), false);
                 EnableOptionFileNameOption = GetBoolFromString(nameof(EnableOptionFileNameOption), false);
+                WindowCaptureEnabled = GetBoolFromString(nameof(WindowCaptureEnabled), true);
+                ScreenCaptureEnabled = GetBoolFromString(nameof(ScreenCaptureEnabled), true);
+                SelectEnabled = GetBoolFromString(nameof(SelectEnabled), false);
+                OverlayTabNameEnabled = GetBoolFromString(nameof(OverlayTabNameEnabled), true);
+                OverlayFileNameEnabled = GetBoolFromString(nameof(OverlayFileNameEnabled), true);
 
                 string[] GetArrayFromString(string name, string[] defaultList, string separator)
                 {
@@ -998,7 +1076,12 @@ namespace CaptureTool
                 new XElement(nameof(EnableViewOverlay), EnableViewOverlay.ToString()),
                 new XElement(nameof(EnableViewCapture), EnableViewCapture.ToString()),
                 new XElement(nameof(EnableViewOther), EnableViewOther.ToString()),
-                new XElement(nameof(EnableOptionFileNameOption), EnableOptionFileNameOption.ToString())
+                new XElement(nameof(EnableOptionFileNameOption), EnableOptionFileNameOption.ToString()),
+                new XElement(nameof(WindowCaptureEnabled), WindowCaptureEnabled.ToString()),
+                new XElement(nameof(ScreenCaptureEnabled), ScreenCaptureEnabled.ToString()),
+                new XElement(nameof(SelectEnabled), SelectEnabled.ToString()),
+                new XElement(nameof(OverlayTabNameEnabled), OverlayTabNameEnabled.ToString()),
+                new XElement(nameof(OverlayFileNameEnabled), OverlayFileNameEnabled.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -1034,14 +1117,19 @@ namespace CaptureTool
             EnableAutoSave = true;
             EnableAero = true;
             TopMost = false;
-            EnableViewKeyBind = false;
-            EnableViewKeyBindingViewer = true;
+            EnableViewKeyBind = true;
+            EnableViewKeyBindingViewer = false;
             EnableViewSaveFormat = false;
             EnableViewSaveDir = true;
             EnableViewOverlay = false;
             EnableViewCapture = false;
             EnableViewOther = false;
             EnableOptionFileNameOption = false;
+            WindowCaptureEnabled = true;
+            ScreenCaptureEnabled = true;
+            SelectEnabled = false;
+            OverlayTabNameEnabled = true;
+            OverlayFileNameEnabled = true;
         }
     }
 

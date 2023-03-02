@@ -93,7 +93,7 @@ namespace CaptureTool
 
         private void AddTabButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowDataContext.AddTab(mainWindowDataContext.UserControls.Count);
+            mainWindowDataContext.AddTab(mainWindowDataContext.LastTabNumber + 1);
         }
 
         private void mainTabCtl_SelectionChanged(object sender, SelectionChangedEventArgs e)

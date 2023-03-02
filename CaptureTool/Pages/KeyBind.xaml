@@ -17,12 +17,14 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="修飾キー" Margin="0,0,5,0"/>
             <Button x:Name="preKeyButton" Content="{Binding PreKeyText}" Grid.Column="1" Margin="0,0,5,0" Click="ClickStartSetting"/>
             <TextBlock Text="+" Margin="0,0,5,0" Grid.Column="2"/>
             <TextBlock Text="キー" Margin="0,0,5,0" Grid.Column="3"/>
             <Button x:Name="keyButton" Content="{Binding KeyText}" Grid.Column="4" Click="ClickStartSetting"/>
+            <CheckBox Content="有効" Grid.Column="5" Margin="5,0,0,0" IsChecked="{Binding WindowCaptureEnabled}"/>
         </Grid>
 
         <TextBlock Text="スクリーンキャプチャ"/>
@@ -33,12 +35,14 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="修飾キー" Margin="0,0,5,0"/>
             <Button x:Name="screenPreKeyButton" Content="{Binding ScreenPreKeyText}" Grid.Column="1" Margin="0,0,5,0" Click="ClickStartSetting"/>
             <TextBlock Text="+" Margin="0,0,5,0" Grid.Column="2"/>
             <TextBlock Text="キー" Margin="0,0,5,0" Grid.Column="3"/>
             <Button x:Name="screenKeyButton" Content="{Binding ScreenKeyText}" Grid.Column="4" Click="ClickStartSetting"/>
+            <CheckBox Content="有効" Grid.Column="5" Margin="5,0,0,0" IsChecked="{Binding ScreenCaptureEnabled}"/>
         </Grid>
 
         <TextBlock Text="クリップボードのテキストを取得"/>
@@ -49,12 +53,14 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="修飾キー" Margin="0,0,5,0"/>
             <Button x:Name="selectPreKeyButton" Content="{Binding SelectPreKeyText}" Grid.Column="1" Margin="0,0,5,0" Click="ClickStartSetting"/>
             <TextBlock Text="+" Margin="0,0,5,0" Grid.Column="2"/>
             <TextBlock Text="キー" Margin="0,0,5,0" Grid.Column="3"/>
             <Button x:Name="selectKeyButton" Content="{Binding SelectKeyText}" Grid.Column="4" Click="ClickStartSetting"/>
+            <CheckBox Content="有効" Grid.Column="5" Margin="5,0,0,0" IsChecked="{Binding SelectEnabled}"/>
         </Grid>
     </StackPanel>
 </UserControl>

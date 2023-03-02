@@ -6,20 +6,23 @@
              xmlns:local="clr-namespace:CaptureTool.Pages"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
+    </UserControl.Resources>
     <WrapPanel>
-        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0" Visibility="{Binding WindowCaptureEnabled,Converter={StaticResource BoolVisibilityConverter}}">
             <TextBlock Text="ウィンドウ" Margin="0,0,2,0" Foreground="DarkRed"/>
             <TextBlock Text="{Binding PreKeyText}" Foreground="DarkRed"/>
             <TextBlock Text="+" Margin="2,0" Foreground="DarkRed"/>
             <TextBlock Text="{Binding KeyText}" Foreground="DarkRed"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,0" Visibility="{Binding ScreenCaptureEnabled,Converter={StaticResource BoolVisibilityConverter}}">
             <TextBlock Text="スクリーン" Margin="0,0,2,0" Foreground="DarkBlue"/>
             <TextBlock Text="{Binding ScreenPreKeyText}" Foreground="DarkBlue"/>
             <TextBlock Text="+" Margin="2,0" Foreground="DarkBlue"/>
             <TextBlock Text="{Binding ScreenKeyText}" Foreground="DarkBlue"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Visibility="{Binding SelectEnabled,Converter={StaticResource BoolVisibilityConverter}}">
             <TextBlock Text="クリップボード" Margin="0,0,2,0" Foreground="DarkGreen"/>
             <TextBlock Text="{Binding SelectPreKeyText}" Foreground="DarkGreen"/>
             <TextBlock Text="+" Margin="2,0" Foreground="DarkGreen"/>

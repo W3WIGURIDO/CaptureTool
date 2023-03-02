@@ -237,7 +237,7 @@ namespace CaptureTool
         private const string FormatText = "Text";
         private static string tempPath = Path.GetTempPath();
 
-        public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb, int compressMode = 0, string compressOption = "")
+        public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb, int compressMode = 0, string compressOption = "", bool enabledOvarlayTabName = true, int tabNumber = 0, bool enabledOverlayFileName = true)
         {
             const string WordWindowTitle = "<WindowTitle>";
             const string DesktopText = "Desktop";
@@ -339,6 +339,27 @@ namespace CaptureTool
                 ImageSource imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
                 if (enableOverlay)
                 {
+                    StringBuilder overlayText = new StringBuilder();
+                    if (enabledOvarlayTabName)
+                    {
+                        overlayText.Append((tabNumber + 1).ToString());
+                        overlayText.Append(": ");
+                    }
+                    if (enabledOverlayFileName)
+                    {
+                        string overlayFilename = "";
+                        try
+                        {
+                            overlayFilename = Path.GetFileName(fileName);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                        overlayText.Append(overlayFilename);
+                        overlayText.Append(": ");
+                    }
+                    OverlayWindowDataContext overlayWindowDataContext = new OverlayWindowDataContext() { OverlayText = overlayText.ToString() };
                     OverlayWindow overlayWindow = new OverlayWindow()
                     {
                         ImageSource = imageSource,
@@ -346,7 +367,8 @@ namespace CaptureTool
                         OverlayHorizontalAlignment = overlayHorizontalAlignment,
                         OverlayVerticalAlignment = overlayVerticalAlignment,
                         ImageGridWidth = imageGridWidth,
-                        ImageGridHeight = imageGridHeight
+                        ImageGridHeight = imageGridHeight,
+                        DataContext = overlayWindowDataContext
                     };
                     overlayWindow.Show();
                     prevOverlayWindow = overlayWindow;

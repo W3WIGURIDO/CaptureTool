@@ -28,7 +28,7 @@ namespace CaptureTool
             this.DataContext = settings;
             settings.OwnerInstance = this;
             settings.HotKeySettings = new HotKeySettings(settings);
-            settings.HotKeySettings.StartHotKey();
+            //settings.HotKeySettings.StartHotKey();
         }
 
         private void InvisibleButton_GotFocus(object sender, RoutedEventArgs e)
@@ -61,6 +61,11 @@ namespace CaptureTool
             {
                 settings.ResetSettings();
             }
+        }
+
+        private void viewWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.GetMainWindowDataContext().ViewWindowTab();
         }
     }
 }

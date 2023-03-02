@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
     </UserControl.Resources>
-    <Grid>
+    <Grid x:Name="mainGrid">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="auto"/>
@@ -22,11 +22,13 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="0.35*"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="saveButton" Content="設定保存" Click="ClickSave"/>
-                <Button x:Name="instanceSettingButton" Content="詳細設定(個別)" Click="instanceSettingButton_Click" Grid.Column="1"/>
-                <Button Content="設定リセット" Click="ClickReset" Grid.Column="2"/>
+                <Button x:Name="saveButton" Content="設定保存" Click="ClickSave" ToolTip="設定値を保存します。"/>
+                <Button x:Name="instanceSettingButton" Content="詳細設定(個別)" Click="instanceSettingButton_Click" Grid.Column="1" ToolTip="キャプチャツールの設定を行います。設定値はタブごとに別となっています。"/>
+                <Button x:Name="viewWindowButton" Content="別ウィンドウで表示" Grid.Column="2" Click="viewWindowButton_Click" ToolTip="タブを別ウィンドウで表示します。"/>
+                <Button Content="設定リセット" Click="ClickReset" Grid.Column="3" ToolTip="設定値をデフォルトにリセットします。"/>
             </Grid>
             <pages:KeyBind Visibility="{Binding EnableViewKeyBind,Converter={StaticResource BoolVisibilityConverter}}"/>
             <pages:KeyBindingViewer Visibility="{Binding EnableViewKeyBindingViewer,Converter={StaticResource BoolVisibilityConverter}}"/>

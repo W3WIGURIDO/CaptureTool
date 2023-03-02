@@ -26,10 +26,34 @@ namespace CaptureTool
 
         public void StartHotKey()
         {
+            if (settings.WindowCaptureEnabled)
+            {
+                StartWindowHotkKey();
+            }
+            if (settings.ScreenCaptureEnabled)
+            {
+                StartScreenHotKey();
+            }
+            if (settings.SelectEnabled)
+            {
+                StartSelectHotKey();
+            }
+        }
+
+        public void StartWindowHotkKey()
+        {
             windowHotKey = new HotKey(EnumScan.FlagToMOD_KEY(settings.PreKey), settings.Key) { HotKeyName = WindowCapture };
             windowHotKey.HotKeyPush += new EventHandler(HotKey_HotKeyPush);
+        }
+
+        public void StartScreenHotKey()
+        {
             screenHotKey = new HotKey(EnumScan.FlagToMOD_KEY(settings.ScreenPreKey), settings.ScreenKey) { HotKeyName = ScreenCapture };
             screenHotKey.HotKeyPush += new EventHandler(HotKey_HotKeyPush);
+        }
+
+        public void StartSelectHotKey()
+        {
             selectHotKey = new HotKey(EnumScan.FlagToMOD_KEY(settings.SelectPreKey), settings.SelectKey) { HotKeyName = SelectWindow };
             selectHotKey.HotKeyPush += new EventHandler(HotKey_SelectWindow);
         }
@@ -42,9 +66,36 @@ namespace CaptureTool
 
         public void DisposeHotKeys()
         {
-            windowHotKey.Dispose();
-            screenHotKey.Dispose();
-            selectHotKey.Dispose();
+            windowHotKey?.TryDispose();
+            screenHotKey?.TryDispose();
+            selectHotKey?.TryDispose();
+        }
+
+        public void ResetWindowHotKey()
+        {
+            windowHotKey?.TryDispose();
+            if (settings.WindowCaptureEnabled)
+            {
+                StartWindowHotkKey();
+            }
+        }
+
+        public void ResetScreenHotKey()
+        {
+            screenHotKey?.TryDispose();
+            if (settings.ScreenCaptureEnabled)
+            {
+                StartScreenHotKey();
+            }
+        }
+
+        public void ResetSelectHotKey()
+        {
+            selectHotKey?.TryDispose();
+            if (settings.SelectEnabled)
+            {
+                StartSelectHotKey();
+            }
         }
 
         public void HotKey_HotKeyPush(object sender, EventArgs e)
@@ -85,7 +136,7 @@ namespace CaptureTool
                             {
                                 compressOption = settings.CompressNumsZopfli.Keys.ElementAt(settings.CompressIndexZopfli);
                             }
-                            if (MainProcess.CaptureScreen(settings.Directory + "\\" + settings.SampleFileName, settings.Directory, imageFormatName: imageFormatSelectStr, overlayTime: settings.OverlayTimeInt, enableOverlay: settings.EnableOverlay == true, overlayHorizontalAlignment: positionSet.HorizontalAlignment, overlayVerticalAlignment: positionSet.VerticalAlignment, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName), aero: settings.EnableAero == true, enableCursor: settings.EnableCursor == true, captureMode: settings.CaptureModeIndex, imageGridWidth: settings.OverlayX, imageGridHeight: settings.OverlayY, enableSetArrow: settings.EnableSetArrow == true, pixelFormat: settings.PixelFormats.Keys.ElementAt(settings.PixelFormatIndex), compressMode: (int)settings.CompressSelect, compressOption: compressOption))
+                            if (MainProcess.CaptureScreen(settings.Directory + "\\" + settings.SampleFileName, settings.Directory, imageFormatName: imageFormatSelectStr, overlayTime: settings.OverlayTimeInt, enableOverlay: settings.EnableOverlay == true, overlayHorizontalAlignment: positionSet.HorizontalAlignment, overlayVerticalAlignment: positionSet.VerticalAlignment, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName), aero: settings.EnableAero == true, enableCursor: settings.EnableCursor == true, captureMode: settings.CaptureModeIndex, imageGridWidth: settings.OverlayX, imageGridHeight: settings.OverlayY, enableSetArrow: settings.EnableSetArrow == true, pixelFormat: settings.PixelFormats.Keys.ElementAt(settings.PixelFormatIndex), compressMode: (int)settings.CompressSelect, compressOption: compressOption, enabledOvarlayTabName: settings.OverlayTabNameEnabled == true, tabNumber: settings.TabNumber, enabledOverlayFileName: settings.OverlayFileNameEnabled == true))
                             {
                                 settings.NumberCount++;
                             }

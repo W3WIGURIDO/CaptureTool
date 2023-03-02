@@ -51,36 +51,61 @@ namespace CaptureTool.Pages
                 {
                     settings.KeyText = inputText;
                     settings.Key = ShowKeyInputDialog(false);
+
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetWindowHotKey();
+                    }
                 }
                 else if (sender == preKeyButton)
                 {
                     settings.PreKeyText = inputText;
                     settings.PreKey = ShowKeyInputDialog(true);
+
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetWindowHotKey();
+                    }
                 }
                 else if (sender == screenKeyButton)
                 {
                     settings.ScreenKeyText = inputText;
                     settings.ScreenKey = ShowKeyInputDialog(false);
+
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetScreenHotKey();
+                    }
                 }
                 else if (sender == screenPreKeyButton)
                 {
                     settings.ScreenPreKeyText = inputText;
                     settings.ScreenPreKey = ShowKeyInputDialog(true);
+
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetScreenHotKey();
+                    }
                 }
                 else if (sender == selectKeyButton)
                 {
                     settings.SelectKeyText = inputText;
                     settings.SelectKey = ShowKeyInputDialog(false);
+
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetSelectHotKey();
+                    }
                 }
                 else if (sender == selectPreKeyButton)
                 {
                     settings.SelectPreKeyText = inputText;
                     settings.SelectPreKey = ShowKeyInputDialog(true);
-                }
 
-                if (AutoResetHotKey)
-                {
-                    settings.HotKeySettings.ResetHotKey();
+                    if (AutoResetHotKey)
+                    {
+                        settings.HotKeySettings.ResetSelectHotKey();
+                    }
                 }
             }
         }
@@ -91,7 +116,8 @@ namespace CaptureTool.Pages
             KeyInputForm keyInputForm = new KeyInputForm()
             {
                 StartPosition = System.Windows.Forms.FormStartPosition.Manual,
-                Location = new System.Drawing.Point((int)activeWindow.Left, (int)activeWindow.Top)
+                Location = new System.Drawing.Point((int)activeWindow.Left, (int)activeWindow.Top),
+                TopMost = settings.TopMost
             };
             keyInputForm.PreMode = enablePreMode;
             keyInputForm.ShowDialog();
