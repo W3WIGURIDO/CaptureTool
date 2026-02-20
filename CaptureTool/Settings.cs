@@ -1036,6 +1036,17 @@ namespace CaptureTool
             }
         }
 
+        private bool? _EnableSetFileNameOnCapture;
+        public bool? EnableSetFileNameOnCapture
+        {
+            get => _EnableSetFileNameOnCapture;
+            set
+            {
+                _EnableSetFileNameOnCapture = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private string _FileNameComboSourceText;
         public string FileNameComboSourceText
         {
@@ -1206,6 +1217,7 @@ namespace CaptureTool
                 OverlayFileNameEnabled = GetBoolFromString(nameof(OverlayFileNameEnabled), true);
                 EnableIpHostTrans = GetBoolFromString(nameof(EnableIpHostTrans), true);
                 EnableAutoContinueCount = GetBoolFromString(nameof(EnableAutoContinueCount), true);
+                EnableSetFileNameOnCapture = GetBoolFromString(nameof(EnableSetFileNameOnCapture), false);
 
                 string[] GetArrayFromString(string name, string[] defaultList, string separator)
                 {
@@ -1302,7 +1314,8 @@ namespace CaptureTool
                 new XElement(nameof(EnableIpHostTrans), EnableIpHostTrans.ToString()),
                 new XElement(nameof(IpHostTransHosts), IpHostTransHosts.ToString()),
                 new XElement(nameof(EnableAutoContinueCount), EnableAutoContinueCount.ToString()),
-                new XElement(nameof(FileNameComboSourceText), FileNameComboSourceText.ToString())
+                new XElement(nameof(FileNameComboSourceText), FileNameComboSourceText.ToString()),
+                new XElement(nameof(EnableSetFileNameOnCapture), EnableSetFileNameOnCapture.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -1357,6 +1370,7 @@ namespace CaptureTool
             IpHostTransHosts = etcHosts;
             EnableAutoContinueCount = true;
             FileNameComboSourceText = "";
+            EnableSetFileNameOnCapture = false;
         }
     }
 

@@ -443,6 +443,47 @@ namespace CaptureTool
             {
                 IntPtr windowHandle = GetForegroundWindow();
 
+                // ★ キャプチャ時にファイル名を設定：Windows標準ファイル保存ダイアログを表示
+                if (settings.EnableSetFileNameOnCapture == true)
+                {
+                    string currentExt = imageFormatName.ToLower(); // "png" or "jpg"
+
+                    using (var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonSaveFileDialog())
+                    {
+                        dialog.Title = "保存ファイルを指定";
+                        // 初期ディレクトリ：現在のDirectory設定を使用
+                        if (Directory.Exists(dirName))
+                        {
+                            dialog.InitialDirectory = dirName;
+                        }
+                        // 初期ファイル名：現在のFileName設定を使用
+                        dialog.DefaultFileName = fileName;
+                        dialog.DefaultExtension = currentExt;
+                        dialog.Filters.Add(new Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogFilter(currentExt.ToUpper() + " ファイル", "*." + currentExt));
+                        dialog.Filters.Add(new Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogFilter("すべてのファイル", "*.*"));
+                        dialog.AlwaysAppendDefaultExtension = true;
+                        dialog.EnsureValidNames = true;
+
+                        if (dialog.ShowDialog(MainWindow.GetMainWindow()) != Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+                        {
+                            // キャンセル時はキャプチャしない
+                            return false;
+                        }
+
+                        string selectedFullPath = dialog.FileName;
+                        string selectedDir = Path.GetDirectoryName(selectedFullPath);
+                        string selectedFileNameWithoutExt = Path.GetFileNameWithoutExtension(selectedFullPath);
+
+                        // 選択結果を settings に反映（Directory・FileName 両方を更新）
+                        settings.Directory = selectedDir;
+                        settings.FileName = selectedFileNameWithoutExt;
+
+                        // このキャプチャで使うローカル変数も更新
+                        dirName = selectedDir;
+                        fileName = selectedFileNameWithoutExt;
+                    }
+                }
+
                 var convResult = doNameRegexConverts(fileName, dirName, screenFlag, windowHandle, settings);
                 fileName = convResult.Item1;
                 dirName = convResult.Item2;
