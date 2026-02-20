@@ -8,7 +8,9 @@ namespace CallCompress
 {
     internal class Program
     {
+#if DEBUG
         private static bool enableLog = false;
+#endif
 
         public static void Main(string[] args)
         {
