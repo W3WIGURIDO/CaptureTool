@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CaptureTool.SettingWindows;
 
 namespace CaptureTool.Pages
 {
@@ -23,6 +24,35 @@ namespace CaptureTool.Pages
         public Other()
         {
             InitializeComponent();
+        }
+
+        private void IpHostTransPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog cofd = new Microsoft.Win32.OpenFileDialog()
+            {
+                Title = "ファイルを選択してください",
+            };
+            if (cofd.ShowDialog() != true)
+            {
+                return;
+            }
+
+            // FileNameで選択されたファイルを取得する
+            if (DataContext is Settings settings)
+            {
+                if (settings != null)
+                {
+                    settings.IpHostTransHosts = cofd.FileName;
+                }
+            }
+        }
+
+        private void wtrButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is Settings settings)
+            {
+                new WindowTitleReplaceSettingWindow(settings).ShowDialog();
+            }
         }
     }
 }

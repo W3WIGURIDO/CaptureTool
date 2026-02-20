@@ -22,7 +22,7 @@
                 <Rectangle Stroke="Black" Opacity="0.5" Fill="Black"/>
                 <Viewbox>
                     <Grid>
-                        <Image x:Name="viewImage" Source="{Binding ImageSource}"/>
+                        <Image x:Name="viewImage" Source="{Binding ImageSource,Mode=OneTime}"/>
                     </Grid>
                 </Viewbox>
             </Grid>
@@ -34,7 +34,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid Background="Black" Opacity="0.7"/>
-                <TextBlock Text="{Binding OverlayText}" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="{Binding OverlayText,Mode=OneTime}" FontWeight="Bold" Foreground="White"/>
             </Grid>
         </Grid>
     </Grid>

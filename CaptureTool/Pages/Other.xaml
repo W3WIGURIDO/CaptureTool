@@ -14,5 +14,22 @@
             <CheckBox Grid.Column="1" IsChecked="{Binding EnableVisibilityControl}" VerticalAlignment="Center" Margin="0,0,15,0" Content="スクリーンキャプチャ時ウィンドウ非表示"/>
             <CheckBox Content="常に最前面に表示" IsChecked="{Binding TopMost}"/>
         </WrapPanel>
+        <Button x:Name="wtrButton" Content="ウィンドウタイトル置換設定" HorizontalAlignment="Left" Margin="0,10,0,0" Click="wtrButton_Click"/>
+
+        <CheckBox x:Name="ipHostCheckbox" Content="IPアドレス⇒ホスト名変換" Margin="0,10,0,0" IsChecked="{Binding EnableIpHostTrans}"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Hostsファイル"/>
+            <TextBox x:Name="IpHostTransPathBox" Grid.Column="1" Margin="10,0,0,0" IsEnabled="{Binding IsChecked,ElementName=ipHostCheckbox}" Text="{Binding IpHostTransHosts}"/>
+            <Button x:Name="IpHostTransPathButton" Content="参照" Grid.Column="2" IsEnabled="{Binding IsChecked,ElementName=ipHostCheckbox}" Margin="5,0,0,0" Click="IpHostTransPathButton_Click"/>
+        </Grid>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="変換設定"/>
+            <ComboBox x:Name="positionSelect" SelectedIndex="{Binding IpHostTransSettingIndex}" Grid.Column="4" VerticalAlignment="Center" Width="130" HorizontalAlignment="Left" ItemsSource="{Binding IpHostTransSetting}" SelectedValuePath="Value" DisplayMemberPath="Key" Margin="5,0,0,0"/>
+        </StackPanel>
     </StackPanel>
 </UserControl>

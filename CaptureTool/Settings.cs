@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Xml.Linq;
+using static CaptureTool.Settings;
+using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 
 namespace CaptureTool
 {
@@ -15,6 +17,7 @@ namespace CaptureTool
     {
         const string WordDir = "<Dir>";
         private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Capture";
+        const string etcHosts = @"C:\Windows\System32\drivers\etc\hosts";
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void RaisePropertyChanged([CallerMemberName] string propertyName = null)
@@ -711,7 +714,7 @@ namespace CaptureTool
             }
         }
 
-        private readonly Dictionary<string, string> _CompressNumsZopfli = new Dictionary<string, string>() { { "", "1" }, { "--filters=0me", "2" }, { "--filters=01234me", "3" }, { "--filters=01234mepb", "4" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=0me", "5" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234me", "6" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234mepb", "7" } };
+        private readonly Dictionary<string, string> _CompressNumsZopfli = new Dictionary<string, string>() { { "-y", "1" }, { "--filters=0me -y", "2" }, { "--filters=01234me -y", "3" }, { "--filters=01234mepb -y", "4" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=0me -y", "5" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234me -y", "6" }, { "--lossy_transparent --lossy_8bit --iterations=20 --filters=01234mepb -y", "7" } };
         public Dictionary<string, string> CompressNumsZopfli
         {
             get => _CompressNumsZopfli;
@@ -859,29 +862,213 @@ namespace CaptureTool
         {
             string numberFormat = "{0:D" + NumberDigits + "}";
             string formatedNumber = string.Format(numberFormat, srcNum);
+            var convResult = MainProcess.doNameRegexConverts(FileName, Directory, false, IntPtr.Zero, this);
+            string replacedFileName = convResult.Item1;
             string tmpSampleFileName;
             if (EnableNumber == true)
             {
-                tmpSampleFileName = FileName + CountConju + formatedNumber;
+                tmpSampleFileName = replacedFileName + CountConju + formatedNumber;
             }
             else
             {
-                tmpSampleFileName = FileName;
+                tmpSampleFileName = replacedFileName;
             }
 
-            string dirName;
-            try
-            {
-                dirName = System.IO.Path.GetFileNameWithoutExtension(Directory);
-            }
-            catch
-            {
-                dirName = string.Empty;
-            }
-            tmpSampleFileName = FileNameDirRegexConvert(tmpSampleFileName, dirName);
-            tmpSampleFileName = System.Text.RegularExpressions.Regex.Replace(tmpSampleFileName, "[<>]", string.Empty);
+            //string dirName;
+            //try
+            //{
+            //    dirName = System.IO.Path.GetFileNameWithoutExtension(Directory);
+            //}
+            //catch
+            //{
+            //    dirName = string.Empty;
+            //}
+            //tmpSampleFileName = FileNameDirRegexConvert(tmpSampleFileName, dirName);
+            //tmpSampleFileName = System.Text.RegularExpressions.Regex.Replace(tmpSampleFileName, "[<>]", string.Empty);
             return tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
         }
+
+        public string GetSampleFileName(int srcNum, string fileName)
+        {
+            string numberFormat = "{0:D" + NumberDigits + "}";
+            string formatedNumber = string.Format(numberFormat, srcNum);
+            string tmpSampleFileName;
+            if (EnableNumber == true)
+            {
+                tmpSampleFileName = fileName + CountConju + formatedNumber;
+            }
+            else
+            {
+                tmpSampleFileName = fileName;
+            }
+            return tmpSampleFileName + "." + SaveFormats[(SaveFormat)SaveFormatIndex];
+        }
+
+        public class WindowTitleReplaceSetting
+        {
+            public string pattern { get; set; } = string.Empty;
+            public string replacement { get; set; } = string.Empty;
+            public bool? isRegex { get; set; } = false;
+        }
+
+        private System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting> _WindowTitleReplaceSettings = new System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>();
+        public System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting> WindowTitleReplaceSettings
+        {
+            get => _WindowTitleReplaceSettings;
+            set
+            {
+                _WindowTitleReplaceSettings = value;
+                RaisePropertyChanged(nameof(WindowTitleReplaceSettings));
+            }
+        }
+
+        private bool? _EnableIpHostTrans;
+        public bool? EnableIpHostTrans
+        {
+            get => _EnableIpHostTrans;
+            set
+            {
+                _EnableIpHostTrans = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _IpHostTransHosts;
+        public string IpHostTransHosts
+        {
+            get => _IpHostTransHosts;
+            set
+            {
+                var preValue = _IpHostTransHosts;
+                _IpHostTransHosts = value;
+                RaisePropertyChanged();
+                if (value != preValue)
+                {
+                    ReadHosts();
+                }
+            }
+        }
+
+        private int _IpHostTransSettingIndex;
+        public int IpHostTransSettingIndex
+        {
+            get => _IpHostTransSettingIndex;
+            set
+            {
+                _IpHostTransSettingIndex = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public Dictionary<string, List<string>> HostsData { get; set; } = new Dictionary<string, List<string>>();
+
+        public void ReadHosts()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(IpHostTransHosts) && System.IO.File.Exists(IpHostTransHosts))
+                {
+                    HostsData = new Dictionary<string, List<string>>();
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(IpHostTransHosts))
+                    {
+                        while (sr.Peek() != -1)
+                        {
+                            string hostsLine = sr.ReadLine();
+                            hostsLine = System.Text.RegularExpressions.Regex.Replace(hostsLine, "#.*", string.Empty);
+                            hostsLine = hostsLine.Trim();
+                            if (!string.IsNullOrEmpty(hostsLine))
+                            {
+                                var splited = hostsLine.Split(new string[] { " ", "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                                if (splited.Length >= 2)
+                                {
+                                    var keyIp = splited[0];
+                                    var names = splited.Skip(1).ToList();
+                                    names.Sort((a, b) =>
+                                    {
+                                        if (!a.Contains(".")) { return -1; }
+                                        if (!b.Contains(".")) { return 1; }
+                                        return a.Length - b.Length;
+                                    });
+                                    if (HostsData.ContainsKey(keyIp))
+                                    {
+                                        HostsData[keyIp].AddRange(names);
+                                        HostsData[keyIp].Sort((a, b) =>
+                                        {
+                                            if (!a.Contains(".")) { return -1; }
+                                            if (!b.Contains(".")) { return 1; }
+                                            return a.Length - b.Length;
+                                        });
+                                    }
+                                    else
+                                    {
+                                        HostsData.Add(keyIp, names);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+
+        private readonly Dictionary<string, string> _IpHostTransSetting = new Dictionary<string, string>() {
+            { "ホスト名のみ", "<hostname>" },
+            { "ホスト名+IPアドレス", "<hostname>(<IPAddress>)" }
+        };
+        public Dictionary<string, string> IpHostTransSetting
+        {
+            get => _IpHostTransSetting;
+        }
+
+        private bool? _EnableAutoContinueCount;
+        public bool? EnableAutoContinueCount
+        {
+            get => _EnableAutoContinueCount;
+            set
+            {
+                _EnableAutoContinueCount = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _FileNameComboSourceText;
+        public string FileNameComboSourceText
+        {
+            get => _FileNameComboSourceText;
+            set
+            {
+                _FileNameComboSourceText = value;
+                CreateFileNameComboSource(_FileNameComboSourceText);
+                RaisePropertyChanged();
+            }
+        }
+
+
+        private System.Collections.ObjectModel.ObservableCollection<string> _FileNameComboSource = new System.Collections.ObjectModel.ObservableCollection<string>();
+        public System.Collections.ObjectModel.ObservableCollection<string> FileNameComboSource
+        {
+            get => _FileNameComboSource;
+            set
+            {
+                _FileNameComboSource = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public void CreateFileNameComboSource(string source)
+        {
+            if (!string.IsNullOrEmpty(source))
+            {
+                var lines = source.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                FileNameComboSource = new System.Collections.ObjectModel.ObservableCollection<string>(lines);
+            }
+        }
+
 
         private string SettingFile = "setting.xml";
         const string SettingPreName = "setting";
@@ -940,6 +1127,26 @@ namespace CaptureTool
                 DigitsText = GetStringFromSettingFile(nameof(DigitsText), "3");
                 OverlayTime = GetStringFromSettingFile(nameof(OverlayTime), "3000");
                 CountConju = GetStringFromSettingFile(nameof(CountConju), "_");
+                IpHostTransHosts = GetStringFromSettingFile(nameof(IpHostTransHosts), etcHosts);
+                FileNameComboSourceText = GetStringFromSettingFile(nameof(FileNameComboSourceText), "");
+
+                string tmpWindowTitleReplaceSettings = GetStringFromSettingFile(nameof(WindowTitleReplaceSettings), null);
+                if (!string.IsNullOrEmpty(tmpWindowTitleReplaceSettings))
+                {
+                    try
+                    {
+                        System.Xml.Serialization.XmlSerializer xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>));
+                        WindowTitleReplaceSettings = xmlSerializer.Deserialize(new System.IO.StringReader(tmpWindowTitleReplaceSettings)) as System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                if (WindowTitleReplaceSettings == null)
+                {
+                    WindowTitleReplaceSettings = new System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>() { new WindowTitleReplaceSetting() { pattern = "", replacement = "", isRegex = false } };
+                }
 
                 int GetIntFromString(string name, int defaultInt)
                 {
@@ -961,6 +1168,7 @@ namespace CaptureTool
                 CaptureModeIndex = GetIntFromString(nameof(CaptureModeIndex), 1);
                 CompressIndex = GetIntFromString(nameof(CompressIndex), 0);
                 CompressIndexZopfli = GetIntFromString(nameof(CompressIndexZopfli), 0);
+                IpHostTransSettingIndex = GetIntFromString(nameof(IpHostTransSettingIndex), 0);
 
                 bool GetBoolFromString(string name, bool defaultBool)
                 {
@@ -996,6 +1204,8 @@ namespace CaptureTool
                 SelectEnabled = GetBoolFromString(nameof(SelectEnabled), false);
                 OverlayTabNameEnabled = GetBoolFromString(nameof(OverlayTabNameEnabled), true);
                 OverlayFileNameEnabled = GetBoolFromString(nameof(OverlayFileNameEnabled), true);
+                EnableIpHostTrans = GetBoolFromString(nameof(EnableIpHostTrans), true);
+                EnableAutoContinueCount = GetBoolFromString(nameof(EnableAutoContinueCount), true);
 
                 string[] GetArrayFromString(string name, string[] defaultList, string separator)
                 {
@@ -1036,6 +1246,11 @@ namespace CaptureTool
 
         public void SaveSettings()
         {
+            System.Xml.Serialization.XmlSerializer xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>));
+            System.IO.StringWriter stringWriter = new System.IO.StringWriter();
+            xmlSerializer.Serialize(stringWriter, WindowTitleReplaceSettings);
+            string serialized = stringWriter.ToString();
+
             XElement tmpel = new XElement("Settings",
                 new XElement(nameof(Key), Key.ToString()),
                 new XElement(nameof(PreKey), PreKey.ToString()),
@@ -1081,7 +1296,13 @@ namespace CaptureTool
                 new XElement(nameof(ScreenCaptureEnabled), ScreenCaptureEnabled.ToString()),
                 new XElement(nameof(SelectEnabled), SelectEnabled.ToString()),
                 new XElement(nameof(OverlayTabNameEnabled), OverlayTabNameEnabled.ToString()),
-                new XElement(nameof(OverlayFileNameEnabled), OverlayFileNameEnabled.ToString())
+                new XElement(nameof(OverlayFileNameEnabled), OverlayFileNameEnabled.ToString()),
+                new XElement(nameof(WindowTitleReplaceSettings), serialized),
+                new XElement(nameof(IpHostTransSettingIndex), IpHostTransSettingIndex.ToString()),
+                new XElement(nameof(EnableIpHostTrans), EnableIpHostTrans.ToString()),
+                new XElement(nameof(IpHostTransHosts), IpHostTransHosts.ToString()),
+                new XElement(nameof(EnableAutoContinueCount), EnableAutoContinueCount.ToString()),
+                new XElement(nameof(FileNameComboSourceText), FileNameComboSourceText.ToString())
                 );
             XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "true"), tmpel);
             xml.Save(AppDomain.CurrentDomain.BaseDirectory + SettingFile);
@@ -1130,6 +1351,12 @@ namespace CaptureTool
             SelectEnabled = false;
             OverlayTabNameEnabled = true;
             OverlayFileNameEnabled = true;
+            WindowTitleReplaceSettings = new System.Collections.ObjectModel.ObservableCollection<WindowTitleReplaceSetting>() { new WindowTitleReplaceSetting() { pattern = "", replacement = "", isRegex = false } };
+            IpHostTransSettingIndex = 0;
+            EnableIpHostTrans = false;
+            IpHostTransHosts = etcHosts;
+            EnableAutoContinueCount = true;
+            FileNameComboSourceText = "";
         }
     }
 

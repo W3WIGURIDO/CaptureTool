@@ -233,150 +233,356 @@ namespace CaptureTool
             return tmpStr;
         }
 
-        public static OverlayWindow prevOverlayWindow;
-        private const string FormatText = "Text";
-        private static string tempPath = Path.GetTempPath();
+        public static string FileNameDirRegexConvert(string origStr, string dirName)
+        {
+            const string WordDir = "<Dir>";
+            string tmpStr = origStr;
+            if (origStr.Contains(WordDir))
+            {
+                string dirNameLast = Path.GetFileName(dirName);
+                tmpStr = tmpStr.Replace(WordDir, dirNameLast);
+            }
+            return tmpStr;
+        }
 
-        public static bool CaptureScreen(string fileName, string dirName, string imageFormatName = "Png", int overlayTime = 3000, bool enableOverlay = true, HorizontalAlignment overlayHorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment overlayVerticalAlignment = VerticalAlignment.Top, bool screenFlag = true, bool aero = true, double imageGridWidth = 200, double imageGridHeight = 150, bool enableCursor = false, int captureMode = 0, bool enableSetArrow = false, System.Drawing.Imaging.PixelFormat pixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb, int compressMode = 0, string compressOption = "", bool enabledOvarlayTabName = true, int tabNumber = 0, bool enabledOverlayFileName = true)
+
+        public static string FileNameWindowTitleRegexConvert(string origStr, string title)
         {
             const string WordWindowTitle = "<WindowTitle>";
             const string DesktopText = "Desktop";
+            string tmpStr = origStr;
+            if (origStr.Contains(WordWindowTitle))
+            {
+                if (string.IsNullOrEmpty(title))
+                {
+                    title = DesktopText;
+                }
+                title = System.Text.RegularExpressions.Regex.Replace(title, "[\\\\/:*?\"<>|]", string.Empty);
+                tmpStr = tmpStr.Replace(WordWindowTitle, title);
+            }
+            return tmpStr;
+        }
+
+        public static string doWindowTitleReplace(string origStr, IEnumerable<Settings.WindowTitleReplaceSetting> list)
+        {
+            string tmpStr = origStr;
+            foreach (Settings.WindowTitleReplaceSetting setting in list)
+            {
+                try
+                {
+                    if (setting.isRegex == true)
+                    {
+                        tmpStr = System.Text.RegularExpressions.Regex.Replace(tmpStr, setting.pattern, setting.replacement);
+                    }
+                    else
+                    {
+                        tmpStr = tmpStr.Replace(setting.pattern, setting.replacement);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OverlayDialog overlayDialog = new OverlayDialog(ex.Message)
+                    {
+                        Owner = MainWindow.GetMainWindow()
+                    };
+                    overlayDialog.Show();
+                }
+            }
+            return tmpStr;
+        }
+
+        public static string FileNameHostNameRegexConvert(string origStr)
+        {
+            const string WordHostName = "<HostName>";
+            string tmpStr = origStr;
+            if (origStr.Contains(WordHostName))
+            {
+                try
+                {
+                    string hostname = System.Net.Dns.GetHostName();
+                    hostname = System.Text.RegularExpressions.Regex.Replace(hostname, "[\\\\/:*?\"<>|]", string.Empty);
+                    tmpStr = tmpStr.Replace(WordHostName, hostname);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            return tmpStr;
+        }
+
+        public static string doWindowTitleReplaceHosts(string origStr, Dictionary<string, List<string>> hostsData, int replaceMode)
+        {
+            string tmpStr = origStr;
+            var mc = System.Text.RegularExpressions.Regex.Matches(tmpStr, "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+");
+            foreach (Match m in mc)
+            {
+                if (hostsData.ContainsKey(m.Value))
+                {
+                    string replaceText;
+                    switch (replaceMode)
+                    {
+                        case 1:
+                            replaceText = hostsData[m.Value][0] + "(" + m.Value + ")";
+                            break;
+                        default:
+                            replaceText = hostsData[m.Value][0];
+                            break;
+                    }
+                    tmpStr = tmpStr.Replace(m.Value, replaceText);
+                }
+            }
+            return tmpStr;
+        }
+
+        public static string FileNameWindowTitleRegexConvert(string origStr, bool screenFlag, IntPtr windowHandle, Settings settings)
+        {
+            const string WordWindowTitle = "<WindowTitle>";
+            const string DesktopText = "Desktop";
+            string tmpStr = origStr;
+
+            if (tmpStr.Contains(WordWindowTitle))
+            {
+                if (screenFlag)
+                {
+                    tmpStr = tmpStr.Replace(WordWindowTitle, DesktopText);
+                }
+                else
+                {
+                    Process process = GetProcessFromHandle(windowHandle);
+                    string title = process.MainWindowTitle;
+                    if (string.IsNullOrEmpty(title))
+                    {
+                        title = DesktopText;
+                    }
+                    title = doWindowTitleReplaceHosts(title, settings.HostsData, settings.IpHostTransSettingIndex);
+                    title = System.Text.RegularExpressions.Regex.Replace(title, "[\\\\/:*?\"<>|]", string.Empty);
+                    title = doWindowTitleReplace(title, settings.WindowTitleReplaceSettings);
+                    tmpStr = tmpStr.Replace(WordWindowTitle, title);
+                }
+            }
+            return tmpStr;
+        }
+
+        public static Tuple<string, string> doNameRegexConverts(string fileName, string dirName, bool screenFlag, IntPtr windowHandle, Settings settings)
+        {
+            fileName = FileNameHostNameRegexConvert(fileName);
+            dirName = FileNameHostNameRegexConvert(dirName);
+
+            fileName = FileNameWindowTitleRegexConvert(fileName, screenFlag, windowHandle, settings);
+            dirName = FileNameWindowTitleRegexConvert(dirName, screenFlag, windowHandle, settings);
+
+            fileName = FileNameDateRegexConvert(fileName);
+            dirName = FileNameDateRegexConvert(dirName);
+
+            dirName = System.Text.RegularExpressions.Regex.Replace(dirName, "[/*?\"<>|]", string.Empty);                //フォルダ名確定
+
+            fileName = FileNameDirRegexConvert(fileName, dirName);
+
+            fileName = System.Text.RegularExpressions.Regex.Replace(fileName, "[\\\\:/*?\"<>|]", string.Empty);                //ファイル名確定
+            return new Tuple<string, string>(fileName, dirName);
+        }
+
+        public static Process GetProcessFromHandle(IntPtr windowHandle)
+        {
+            Process process = null;
+            if (process == null)
+            {
+                try
+                {
+                    GetWindowThreadProcessId(windowHandle, out int processID);
+                    process = Process.GetProcessById(processID);
+                    return process;
+                }
+                catch (Exception pex)
+                {
+                    Console.WriteLine(pex.Message);
+                }
+            }
+            return null;
+        }
+
+        public static OverlayWindow prevOverlayWindow;
+        private const string FormatText = "Text";
+        private static string tempPath = Path.GetTempPath();
+        private static readonly string callCompressPath = AppDomain.CurrentDomain.BaseDirectory + "CallCompress.exe";
+        private static readonly string optipngPath = AppDomain.CurrentDomain.BaseDirectory + "optipng.exe";
+        private static readonly string zopflipngPath = AppDomain.CurrentDomain.BaseDirectory + "zopflipng.exe";
+
+        public static bool CaptureScreen(Settings settings, bool screenFlag = true)
+        {
+            string fileName = settings.FileName;
+            string dirName = settings.Directory;
+            string imageFormatName = settings.SaveFormats[settings.SaveFormats.Keys.ElementAt(settings.SaveFormatIndex)];
+            int overlayTime = settings.OverlayTimeInt;
+            bool enableOverlay = settings.EnableOverlay == true;
+            var positionSet = settings.ViewPosition[settings.ViewPosition.Keys.ElementAt(settings.PositionIndex)];
+            HorizontalAlignment overlayHorizontalAlignment = positionSet.HorizontalAlignment;
+            VerticalAlignment overlayVerticalAlignment = positionSet.VerticalAlignment;
+            bool aero = settings.EnableAero == true;
+            double imageGridWidth = settings.OverlayX;
+            double imageGridHeight = settings.OverlayY;
+            bool enableCursor = settings.EnableCursor == true;
+            int captureMode = settings.CaptureModeIndex;
+            bool enableSetArrow = settings.EnableSetArrow == true;
+            System.Drawing.Imaging.PixelFormat pixelFormat = settings.PixelFormats.Keys.ElementAt(settings.PixelFormatIndex);
+            int compressMode = (int)settings.CompressSelect;
+            string compressOption = "";
+            if (settings.CompressSelect == CompressType.Optipng)
+            {
+                compressOption = settings.CompressNums.Keys.ElementAt(settings.CompressIndex);
+            }
+            else if (settings.CompressSelect == CompressType.Zopfli)
+            {
+                compressOption = settings.CompressNumsZopfli.Keys.ElementAt(settings.CompressIndexZopfli);
+            }
+            bool enabledOvarlayTabName = settings.OverlayTabNameEnabled == true;
+            int tabNumber = settings.TabNumber;
+            bool enabledOverlayFileName = settings.OverlayFileNameEnabled == true;
             try
             {
                 IntPtr windowHandle = GetForegroundWindow();
-                Process process = null;
-                void GetProcessFromHandle()
+
+                var convResult = doNameRegexConverts(fileName, dirName, screenFlag, windowHandle, settings);
+                fileName = convResult.Item1;
+                dirName = convResult.Item2;
+
+                if (settings.EnableAutoContinueCount == true)
                 {
-                    if (process == null)
-                    {
-                        try
-                        {
-                            GetWindowThreadProcessId(windowHandle, out int processID);
-                            process = Process.GetProcessById(processID);
-                        }
-                        catch (Exception pex)
-                        {
-                            Console.WriteLine(pex.Message);
-                        }
-                    }
+                    settings.NumberCount = GetContinueFileName(settings, dirName, fileName);
                 }
 
-                if (fileName.Contains(WordWindowTitle))
-                {
-                    if (screenFlag)
-                    {
-                        fileName = fileName.Replace(WordWindowTitle, DesktopText);
-                    }
-                    else
-                    {
-                        GetProcessFromHandle();
-                        string title = process.MainWindowTitle;
-                        if (string.IsNullOrEmpty(title))
-                        {
-                            title = DesktopText;
-                        }
-                        title = System.Text.RegularExpressions.Regex.Replace(title, "[\\\\/:*?\"<>|]", string.Empty);
-                        fileName = fileName.Replace(WordWindowTitle, title);
-                        dirName = dirName.Replace(WordWindowTitle, title);
-                    }
-                }
-                fileName = FileNameDateRegexConvert(fileName);
-                dirName = FileNameDateRegexConvert(dirName);
                 CreateDirectory(dirName);
+                string fullPath = dirName + "\\" + settings.GetSampleFileName(settings.NumberCount, fileName);
 
+                if (File.Exists(fullPath))
+                {
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fullPath);
+                    string extension = Path.GetExtension(fullPath);
+                    fullPath = dirName + "\\" + fileNameWithoutExtension + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + extension;
+                }
+
+                //オーバーレイ非表示
                 if (prevOverlayWindow != null && prevOverlayWindow.ClosingReady)
                 {
+                    prevOverlayWindow.ImageSource = null;
                     prevOverlayWindow.gridView.Opacity = 0;
                     prevOverlayWindow.Close();
+                    prevOverlayWindow = null;
                 }
 
-                Bitmap bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat);
-
-                if (File.Exists(fileName))
+                using (Bitmap bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat))
                 {
-                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-                    string extension = Path.GetExtension(fileName);
-                    fileName = dirName + "\\" + fileNameWithoutExtension + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + extension;
-                }
-                ImageFormat imageFormat;
-                if (imageFormatName.ToUpper().CompareTo("PNG") == 0)
-                {
-                    imageFormat = ImageFormat.Png;
-                }
-                else if (imageFormatName.ToUpper().CompareTo("JPG") == 0)
-                {
-                    imageFormat = ImageFormat.Jpeg;
-                }
-                else
-                {
-                    imageFormat = ImageFormat.Png;
-                }
-
-                if (imageFormat == ImageFormat.Png)
-                {
-                    if (compressMode == 1)
+                    ImageFormat imageFormat;
+                    if (imageFormatName.ToUpper().CompareTo("PNG") == 0)
                     {
-                        bitmap.Save(fileName, imageFormat);
-                        ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "optipng.exe", fileName + " " + compressOption) { WindowStyle = ProcessWindowStyle.Minimized };
-                        Process.Start(compressStartInfo);
+                        imageFormat = ImageFormat.Png;
                     }
-                    else if (compressMode == 2)
+                    else if (imageFormatName.ToUpper().CompareTo("JPG") == 0)
                     {
-                        string tmpName = tempPath + "CaptureToolTmpFile.png";
-                        bitmap.Save(tmpName, imageFormat);
-                        ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "zopflipng.exe", compressOption + " " + tmpName + " " + fileName) { WindowStyle = ProcessWindowStyle.Minimized };
-                        Process.Start(compressStartInfo);
+                        imageFormat = ImageFormat.Jpeg;
                     }
                     else
                     {
-                        bitmap.Save(fileName, imageFormat);
+                        imageFormat = ImageFormat.Png;
                     }
-                }
-                else
-                {
-                    bitmap.Save(fileName, imageFormat);
-                }
-                ImageSource imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
-                if (enableOverlay)
-                {
-                    StringBuilder overlayText = new StringBuilder();
-                    if (enabledOvarlayTabName)
+
+                    if (imageFormat == ImageFormat.Png)
                     {
-                        overlayText.Append((tabNumber + 1).ToString());
-                        overlayText.Append(": ");
-                    }
-                    if (enabledOverlayFileName)
-                    {
-                        string overlayFilename = "";
-                        try
+                        if (compressMode == 1)
                         {
-                            overlayFilename = Path.GetFileName(fileName);
+                            bitmap.Save(fullPath, imageFormat);
+
+                            Task.Run(() =>
+                            {
+                                ProcessStartInfo compressStartInfo = new ProcessStartInfo(callCompressPath, string.Format("\"{0}\" \"{1}\" {2}", optipngPath, fullPath, compressOption)) { WindowStyle = ProcessWindowStyle.Hidden };
+                                Process.Start(compressStartInfo);
+                            });
+
+                            //Task.Run(() =>
+                            //{
+                            //    ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "optipng.exe", fullPath + " " + compressOption) { WindowStyle = ProcessWindowStyle.Hidden };
+                            //    Process.Start(compressStartInfo);
+                            //});
                         }
-                        catch (Exception ex)
+                        else if (compressMode == 2)
                         {
-                            Debug.WriteLine(ex.Message);
+                            string nowHMS = DateTime.Now.ToString("HHmmss");
+                            string tmpName = tempPath + "CaptureToolTmpFile_" + nowHMS + ".png";
+                            bitmap.Save(tmpName, imageFormat);
+                            File.Create(fullPath).Dispose();
+
+                            Task.Run(() =>
+                            {
+                                ProcessStartInfo compressStartInfo = new ProcessStartInfo(callCompressPath, string.Format("\"{0}\" {1} \"{2}\" \"{3}\"", zopflipngPath, compressOption, tmpName, fullPath)) { WindowStyle = ProcessWindowStyle.Hidden };
+                                Process.Start(compressStartInfo);
+                            });
+
+                            //Task.Run(() =>
+                            //{
+                            //    ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "zopflipng.exe", compressOption + " " + tmpName + " " + fullPath) { WindowStyle = ProcessWindowStyle.Hidden };
+                            //    Process.Start(compressStartInfo);
+                            //});
                         }
-                        overlayText.Append(overlayFilename);
-                        overlayText.Append(": ");
+                        else
+                        {
+                            bitmap.Save(fullPath, imageFormat);
+                        }
                     }
-                    OverlayWindowDataContext overlayWindowDataContext = new OverlayWindowDataContext() { OverlayText = overlayText.ToString() };
-                    OverlayWindow overlayWindow = new OverlayWindow()
+                    else
                     {
-                        ImageSource = imageSource,
-                        OverlayTime = overlayTime,
-                        OverlayHorizontalAlignment = overlayHorizontalAlignment,
-                        OverlayVerticalAlignment = overlayVerticalAlignment,
-                        ImageGridWidth = imageGridWidth,
-                        ImageGridHeight = imageGridHeight,
-                        DataContext = overlayWindowDataContext
-                    };
-                    overlayWindow.Show();
-                    prevOverlayWindow = overlayWindow;
+                        bitmap.Save(fullPath, imageFormat);
+                    }
+
+                    ImageSource imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
+                    imageSource.Freeze();
+                    if (enableOverlay)
+                    {
+                        StringBuilder overlayText = new StringBuilder();
+                        if (enabledOvarlayTabName)
+                        {
+                            overlayText.Append((tabNumber + 1).ToString());
+                            overlayText.Append(": ");
+                        }
+                        if (enabledOverlayFileName)
+                        {
+                            string overlayFilename = "";
+                            try
+                            {
+                                overlayFilename = Path.GetFileName(fullPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
+                            overlayText.Append(overlayFilename);
+                            overlayText.Append(": ");
+                        }
+                        OverlayWindowDataContext overlayWindowDataContext = new OverlayWindowDataContext() { OverlayText = overlayText.ToString() };
+                        OverlayWindow overlayWindow = new OverlayWindow()
+                        {
+                            ImageSource = imageSource,
+                            OverlayTime = overlayTime,
+                            OverlayHorizontalAlignment = overlayHorizontalAlignment,
+                            OverlayVerticalAlignment = overlayVerticalAlignment,
+                            ImageGridWidth = imageGridWidth,
+                            ImageGridHeight = imageGridHeight,
+                            DataContext = overlayWindowDataContext
+                        };
+                        overlayWindow.Show();
+                        prevOverlayWindow = overlayWindow;
+                    }
+
                 }
             }
             catch (Exception ex)
             {
-                WpfFolderBrowser.CustomMessageBox.Show(MainWindow.ActiveWindow, ex.Message, "例外", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.None);
+                OverlayDialog overlayDialog = new OverlayDialog(ex.Message)
+                {
+                    Owner = MainWindow.GetMainWindow()
+                };
+                overlayDialog.Show();
+                MainWindow.logger.Error(ex.Message);
                 return false;
             }
             return true;
@@ -500,18 +706,26 @@ namespace CaptureTool
                     }
                     desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
                     DesktopDuplicatorNum = displayIndex;
-                    desktopDuplicator.GetLatestFrame();
+                    desktopDuplicator.GetLatestFrameWithCheck();
                 }
                 DesktopDuplication.DesktopFrame frame = null;
                 int tryCount = 0;
+                StringBuilder message = new StringBuilder();
                 while (tryCount < 3)
                 {
                     try
                     {
-                        frame = desktopDuplicator.GetLatestFrame();
+                        frame = desktopDuplicator.GetLatestFrameWithCheck();
                         if (frame == null)
                         {
+                            message.Append(tryCount + ": " + "frame == null" + "\n");
+                            MainWindow.logger.Error("frame == null");
+                            if (tryCount >= 2)
+                            {
+                                throw new Exception(message.ToString());
+                            }
                             tryCount++;
+                            System.Threading.Thread.Sleep(3000);
                             continue;
                         }
                         Bitmap dupBitmap = frame.DesktopImage.Clone(new Rectangle(rect.left - activeDisplay.Bounds.Left, rect.top - activeDisplay.Bounds.Top, width, height), pixelFormat);
@@ -522,13 +736,23 @@ namespace CaptureTool
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex.Message);
+                        Debug.WriteLine(tryCount + ": " + ex.Message);
+                        message.Append(tryCount + ": " + ex.Message + "\n");
+                        MainWindow.logger.Error(ex.Message + Environment.NewLine + ex.StackTrace);
+                        if (desktopDuplicator.Disposed == false)
+                            desktopDuplicator.Dispose();
                         desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
-                        if (tryCount > 1)
+                        if (tryCount >= 2)
                         {
-                            MessageBox.Show(ex.Message);
+                            throw new Exception(message.ToString());
                         }
                         tryCount++;
+                        //if (ex.Message.Equals("Failed to acquire next frame."))
+                        //{
+                        //    System.Threading.Thread.Sleep(200);
+                        //    Debug.WriteLine("200ms wait");
+                        //}
+                        System.Threading.Thread.Sleep(3000);
                     }
                 }
             }
@@ -817,7 +1041,7 @@ namespace CaptureTool
             return result;
         }
 
-        public static int GetContinueFileName(Settings settings)
+        public static int GetContinueFileNameOld(Settings settings)
         {
             string numberFormat = "{0:D" + settings.NumberDigits + "}";
             for (int index = 0; ; index++)
@@ -828,6 +1052,51 @@ namespace CaptureTool
                     return index;
                 }
             }
+        }
+
+        public static int GetContinueFileNameNoRegex(Settings settings)
+        {
+            return GetContinueFileName(settings, settings.Directory, settings.FileName);
+        }
+
+        public static int GetContinueFileName(Settings settings)
+        {
+            var convResult = doNameRegexConverts(settings.FileName, settings.Directory, false, IntPtr.Zero, settings);
+            return GetContinueFileName(settings, convResult.Item2, convResult.Item1);
+        }
+
+
+        public static int GetContinueFileName(Settings settings, string dirName, string fileName)
+        {
+            try
+            {
+                if (!System.IO.Directory.Exists(dirName))
+                {
+                    return 0;
+                }
+                var fList = System.IO.Directory.EnumerateFiles(dirName).Select(path => Path.GetFileName(path))
+                    .Where(str => { if (Regex.Match(str, fileName + settings.CountConju + "[0-9]{" + settings.NumberDigits + "}\\." + settings.SaveFormats[(SaveFormat)settings.SaveFormatIndex]).Success) { return true; } return false; })
+                    .OrderByDescending(x => x);
+                if (fList.Count() > 0)
+                {
+                    var lastName = fList.ElementAt(0);
+                    var countStr = Path.GetFileNameWithoutExtension(lastName).Replace(fileName + settings.CountConju, "");
+                    if (int.TryParse(countStr, out int result))
+                    {
+                        return result + 1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                OverlayDialog overlayDialog = new OverlayDialog(ex.Message)
+                {
+                    Owner = MainWindow.GetMainWindow()
+                };
+                overlayDialog.Show();
+                MainWindow.logger.Error(ex.Message);
+            }
+            return settings.NumberCount;
         }
     }
 }

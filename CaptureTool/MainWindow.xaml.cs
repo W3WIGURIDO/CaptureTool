@@ -30,6 +30,7 @@ namespace CaptureTool
         public IntPtr Handle { get => _InteropHelper.Handle; }
         private static MainWindow mainWindow;
         private static MainWindowDataContext mainWindowDataContext;
+        public static Logger logger;
 
         public static MainWindow GetMainWindow()
         {
@@ -53,6 +54,7 @@ namespace CaptureTool
             mainWindowDataContext.RefFolderCom.InputGestures.Add(new KeyGesture(Key.R, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(mainWindowDataContext.RefFolderCom, ClickRefCall));
             DataContext = mainWindowDataContext;
+            logger = new Logger(AppDomain.CurrentDomain.BaseDirectory + "log.txt", 0);
         }
 
         public void ClickRefCall(object sender, RoutedEventArgs e)
@@ -70,6 +72,7 @@ namespace CaptureTool
                     mainInstance.settings.SaveSettings();
                 }
             }
+            logger?.Dispose();
         }
 
         private void Window_StateChanged(object sender, EventArgs e)

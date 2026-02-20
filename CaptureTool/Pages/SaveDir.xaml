@@ -53,9 +53,9 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="連番付加"/>
-            <CheckBox Grid.Column="1" IsChecked="{Binding EnableNumber}"/>
+            <CheckBox Grid.Column="1" IsChecked="{Binding EnableNumber}" Content="連番付加"/>
             <TextBlock Text="桁数" Grid.Column="2" Margin="5,0,0,0"/>
             <TextBox x:Name="digitsTextBox" Grid.Column="3" Text="{Binding DigitsText}" TextChanged="DigitsTextBox_TextChanged" MinWidth="30"/>
             <TextBlock Text="カウント：" Grid.Column="4" Margin="5,0,0,0"/>
@@ -84,6 +84,7 @@
             <Button x:Name="continueButton" Content="続行" Grid.Column="8" Click="ContinueButton_Click"/>
             <TextBlock Text="接続語：" Grid.Column="9" Margin="5,0,0,0"/>
             <TextBox Grid.Column="10" Text="{Binding CountConju}" MinWidth="30"/>
+            <CheckBox Content="自動続行" Grid.Column="11" Margin="5,0,0,0" IsChecked="{Binding EnableAutoContinueCount}"/>
         </Grid>
         <Grid Margin="0,2,0,0">
             <Grid.ColumnDefinitions>
@@ -95,7 +96,14 @@
         </Grid>
         <StackPanel Visibility="{Binding EnableOptionFileNameOption,Converter={StaticResource BoolVisibilityConverter}}">
             <TextBlock Text="ファイル名オプション"/>
-            <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名"/>
+            <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名,"/>
+            <TextBlock Text="&lt;HostName&gt;=ホスト名"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="ファイル名候補:"/>
+            <ComboBox x:Name="fileNameCombo" Margin="10,0,0,0" ItemsSource="{Binding FileNameComboSource}" SelectionChanged="fileNameCombo_SelectionChanged"/>
+            <Button x:Name="setFromFileNames" Content="適用" Click="setFromFileNames_Click"/>
+            <Button x:Name="fileNameComboSourceEditButton" Content="編集" Click="fileNameComboSourceEditButton_Click"/>
         </StackPanel>
     </StackPanel>
 

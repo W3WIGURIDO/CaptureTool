@@ -46,7 +46,7 @@
   <ItemGroup>
     <Reference Include="DesktopDuplication, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\desktop-duplication\desktop-duplication-net-master\DesktopDuplication\bin\Release\DesktopDuplication.dll</HintPath>
+      <HintPath>..\..\desktop-duplication_46\desktop-duplication-net-master\DesktopDuplication\bin\Release\DesktopDuplication.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack-Core.1.1.1\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
@@ -91,6 +91,7 @@
     <Compile Include="KeyInputForm.Designer.cs">
       <DependentUpon>KeyInputForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="MainInstance.xaml.cs">
       <DependentUpon>MainInstance.xaml</DependentUpon>
     </Compile>
@@ -138,6 +139,12 @@
     <Compile Include="Settings.cs" />
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingWindows\FileNameComboSourceWindow.xaml.cs">
+      <DependentUpon>FileNameComboSourceWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingWindows\WindowTitleReplaceSettingWindow.xaml.cs">
+      <DependentUpon>WindowTitleReplaceSettingWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="TabWindow.xaml.cs">
       <DependentUpon>TabWindow.xaml</DependentUpon>
@@ -213,7 +220,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="SettingWindows\FileNameComboSourceWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingWindows\WindowTitleReplaceSettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="TabWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WindowChromeDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

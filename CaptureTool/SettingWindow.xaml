@@ -32,7 +32,7 @@
                     <pages:SaveDir/>
                     <StackPanel Visibility="{Binding EnableOptionFileNameOption,Converter={StaticResource boolNegativeToVisibilityConverter}}">
                         <TextBlock Text="ファイル名オプション"/>
-                        <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名"/>
+                        <TextBlock Text="&lt;WindowTitle&gt;=ウィンドウタイトル, &lt;Date&gt;=日付, &lt;Time&gt;=時刻, &lt;Dir&gt;=フォルダ名, &lt;HostName&gt;=ホスト名"/>
                     </StackPanel>
                 </StackPanel>
             </TabItem>

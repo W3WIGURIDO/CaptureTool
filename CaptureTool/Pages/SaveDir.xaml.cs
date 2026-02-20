@@ -21,7 +21,7 @@ namespace CaptureTool.Pages
     /// </summary>
     public partial class SaveDir : UserControl
     {
-        //private bool loadFinished = false;
+        private bool loadFinished = false;
         private Settings settings
         {
             get
@@ -45,7 +45,7 @@ namespace CaptureTool.Pages
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            //loadFinished = true;
+            loadFinished = true;
         }
 
 
@@ -76,11 +76,11 @@ namespace CaptureTool.Pages
 
         private void FileNameBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            //if (loadFinished)
-            //{
-            //    settings.FileName = fileNameBox.Text;
-            //    settings.NumberCount = 0;
-            //}
+            if (loadFinished)
+            {
+                //    settings.FileName = fileNameBox.Text;
+                settings.NumberCount = 0;
+            }
             MainProcess.CreateFileNameNumberCountButtons(settings.FileName, countButtonPanel, settings);
         }
 
@@ -164,13 +164,18 @@ namespace CaptureTool.Pages
         {
             try
             {
-                if (settings.FavDirs.ContainsKey(settings.Directory))
+                string tmpDir = settings.Directory;
+                while (tmpDir.EndsWith("\\"))
+                {
+                    tmpDir = tmpDir.Substring(0, tmpDir.Length - 1);
+                }
+                if (settings.FavDirs.ContainsKey(tmpDir))
                 {
                     WpfFolderBrowser.CustomMessageBox.Show(MainWindow.ActiveWindow, "登録済みのディレクトリです。", "メッセージ");
                     return;
                 }
-                string dirName = System.IO.Path.GetFileNameWithoutExtension(settings.Directory);
-                settings.AddFavDir(settings.Directory, dirName);
+                string dirName = tmpDir.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries).Last();
+                settings.AddFavDir(tmpDir, dirName);
                 favcombo.SelectedIndex = settings.FavDirs.Count - 1;
             }
             catch (Exception ex)
@@ -216,6 +221,31 @@ namespace CaptureTool.Pages
                     favcombo.SelectedIndex = selectedIndex;
                 }
             }
+        }
+
+        private void fileNameComboSourceEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            SettingWindows.FileNameComboSourceWindow fncseWindow = new SettingWindows.FileNameComboSourceWindow() { DataContext = settings };
+            fncseWindow.ShowDialog();
+        }
+
+        private void selectFileNameCombo()
+        {
+            if (settings != null && fileNameCombo != null && fileNameCombo.SelectedIndex >= 0)
+            {
+                var newFileName = settings.FileNameComboSource.ElementAt(fileNameCombo.SelectedIndex);
+                settings.FileName = newFileName;
+            }
+        }
+
+        private void setFromFileNames_Click(object sender, RoutedEventArgs e)
+        {
+            selectFileNameCombo();
+        }
+
+        private void fileNameCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            selectFileNameCombo();
         }
     }
 }

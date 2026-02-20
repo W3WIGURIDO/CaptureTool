@@ -235,7 +235,12 @@ namespace CaptureTool
                 Thread.Sleep(1000);
                 if (ClosingReady)
                 {
-                    Dispatcher.Invoke(() => { Close(); }, System.Windows.Threading.DispatcherPriority.Send);
+                    Dispatcher.Invoke(() =>
+                    {
+                        ImageSource = null;
+                        Close();
+                        MainProcess.prevOverlayWindow = null;
+                    }, System.Windows.Threading.DispatcherPriority.Send);
                 }
             });
         }
