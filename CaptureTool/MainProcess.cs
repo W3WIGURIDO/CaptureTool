@@ -464,23 +464,44 @@ namespace CaptureTool
                         dialog.AlwaysAppendDefaultExtension = true;
                         dialog.EnsureValidNames = true;
 
-                        if (dialog.ShowDialog(MainWindow.GetMainWindow()) != Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+                        // キャプチャツール本体が前面に出ないよう、非表示のダミーウィンドウをオーナーにする
+                        var dummyOwner = new Window
                         {
-                            // キャンセル時はキャプチャしない
-                            return false;
+                            Width = 0,
+                            Height = 0,
+                            WindowStyle = WindowStyle.None,
+                            ShowInTaskbar = false,
+                            Opacity = 0,
+                            Left = -10000,
+                            Top = -10000,
+                            AllowsTransparency = true,
+                        };
+                        dummyOwner.Show();
+                        try
+                        {
+                            if (dialog.ShowDialog(dummyOwner) != Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+                            {
+                                // キャンセル時はキャプチャしない
+                                return false;
+                            }
+
+                            string selectedFullPath = dialog.FileName;
+                            string selectedDir = Path.GetDirectoryName(selectedFullPath);
+                            string selectedFileNameWithoutExt = Path.GetFileNameWithoutExtension(selectedFullPath);
+
+                            // 選択結果を settings に反映（Directory・FileName 両方を更新）
+                            settings.Directory = selectedDir;
+                            settings.FileName = selectedFileNameWithoutExt;
+
+                            // このキャプチャで使うローカル変数も更新
+                            dirName = selectedDir;
+                            fileName = selectedFileNameWithoutExt;
                         }
-
-                        string selectedFullPath = dialog.FileName;
-                        string selectedDir = Path.GetDirectoryName(selectedFullPath);
-                        string selectedFileNameWithoutExt = Path.GetFileNameWithoutExtension(selectedFullPath);
-
-                        // 選択結果を settings に反映（Directory・FileName 両方を更新）
-                        settings.Directory = selectedDir;
-                        settings.FileName = selectedFileNameWithoutExt;
-
-                        // このキャプチャで使うローカル変数も更新
-                        dirName = selectedDir;
-                        fileName = selectedFileNameWithoutExt;
+                        finally
+                        {
+                            // 保存・キャンセルどちらのルートでも確実にクローズ
+                            dummyOwner.Close();
+                        }
                     }
                 }
 
