@@ -477,8 +477,15 @@ namespace CaptureTool
                             Left = -10000,
                             Top = -10000,
                             AllowsTransparency = true,
+                            ShowActivated = false
                         };
                         dummyOwner.Show();
+
+                        // WPFのキーボードフォーカスを解放
+                        System.Windows.Input.Keyboard.ClearFocus();
+                        // 論理フォーカスも移動させておく
+                        System.Windows.Input.FocusManager.SetFocusedElement(System.Windows.Input.FocusManager.GetFocusScope(dummyOwner), null);
+
                         try
                         {
                             if (dialog.ShowDialog(dummyOwner) != Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
