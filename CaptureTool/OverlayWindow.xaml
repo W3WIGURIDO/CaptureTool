@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CaptureTool"
         mc:Ignorable="d"
-        Title="OverlayWindow" Topmost="True" WindowStyle="None" AllowsTransparency="True" Background="Transparent" WindowState="Maximized" ShowInTaskbar="False" Width="800" Height="600" Focusable="False" Closing="Window_Closing">
+        Title="OverlayWindow" Topmost="True" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Width="800" Height="600" Focusable="False" ShowActivated="False" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>

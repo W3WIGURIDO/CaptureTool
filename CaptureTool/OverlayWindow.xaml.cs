@@ -140,6 +140,7 @@ namespace CaptureTool
         private const int GWL_EXSTYLE = (-20);
         private const int WS_SYSMENU = 0x00080000;
         private const int WS_EX_TRANSPARENT = 0x00000020;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
         private const int WM_SYSKEYDOWN = 0x0104;
         private const int VK_F4 = 0x73;
 
@@ -213,10 +214,12 @@ namespace CaptureTool
                 if (value)
                 {
                     extendStyle |= WS_EX_TRANSPARENT;
+                    extendStyle |= WS_EX_NOACTIVATE;  // フォーカス移動を防ぐ
                 }
                 else
                 {
                     extendStyle &= ~WS_EX_TRANSPARENT;
+                    extendStyle &= ~WS_EX_NOACTIVATE;  // フォーカス移動を防ぐ
                 }
                 SetWindowLong(handle, GWL_EXSTYLE, extendStyle);
             }
@@ -267,6 +270,11 @@ namespace CaptureTool
 
             // アニメーションを開始します
             storyboard.Begin();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Maximized;
         }
     }
 

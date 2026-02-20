@@ -286,6 +286,8 @@ namespace CaptureTool
                         Owner = MainWindow.GetMainWindow()
                     };
                     overlayDialog.Show();
+                    MainWindow.logger.Error(ex.Message);
+                    Debug.WriteLine(ex.Message);
                 }
             }
             return tmpStr;
@@ -645,6 +647,7 @@ namespace CaptureTool
                 };
                 overlayDialog.Show();
                 MainWindow.logger.Error(ex.Message);
+                Debug.WriteLine(ex.Message);
                 return false;
             }
             return true;
@@ -1157,6 +1160,7 @@ namespace CaptureTool
                 };
                 overlayDialog.Show();
                 MainWindow.logger.Error(ex.Message);
+                Debug.WriteLine(ex.Message);
             }
             return settings.NumberCount;
         }
