@@ -55,14 +55,6 @@ namespace CaptureTool
             overlayDialog.Show();
         }
 
-        private void ClickReset(object sender, RoutedEventArgs e)
-        {
-            if (WpfFolderBrowser.CustomMessageBox.Show(MainWindow.GetMainWindow(), "設定をリセットします", "確認", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel, MessageBoxOptions.None) == MessageBoxResult.OK)
-            {
-                settings.ResetSettings();
-            }
-        }
-
         private void viewWindowButton_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.GetMainWindowDataContext().ViewWindowTab();

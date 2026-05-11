@@ -51,5 +51,13 @@ namespace CaptureTool
         {
             settings.DefaultOrientation = Orientation.Horizontal;
         }
+
+        private void ClickReset(object sender, RoutedEventArgs e)
+        {
+            if (WpfFolderBrowser.CustomMessageBox.Show(this, "設定をリセットします", "確認", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel, MessageBoxOptions.None) == MessageBoxResult.OK)
+            {
+                settings.ResetSettings();
+            }
+        }
     }
 }

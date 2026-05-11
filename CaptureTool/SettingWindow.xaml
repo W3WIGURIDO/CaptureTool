@@ -55,6 +55,7 @@
         </TabControl>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Margin="0,1">
+            <Button Content="設定リセット" Click="ClickReset" Width="80" Margin="0,0,50,0" ToolTip="設定値をデフォルトにリセットします。"/>
             <Button x:Name="okButton" Content="閉じる" Width="80" Margin="0,0,10,0" Click="okButton_Click" />
             <Button x:Name="okSaveButton" Content="保存して閉じる" Width="80" Margin="0,0,10,0" Click="okSaveButton_Click" />
             <!--<Button x:Name="cancelButton" Content="キャンセル" Width="80"/>-->
