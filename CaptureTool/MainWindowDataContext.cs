@@ -60,14 +60,16 @@ namespace CaptureTool
                 Orientation = Orientation.Horizontal
             };
             stackPanel.Children.Add(new TextBlock() { Text = (index + 1).ToString(), Margin = new System.Windows.Thickness(0, 0, 4, 0) });
-            Button closeButton = new Button() { Content = new TextBlock() { Text = "✖" } };
-            closeButton.Click += (sender, e) =>
-            {
-                RemoveTab(mainInstance, tabItem);
-            };
-            stackPanel.Children.Add(closeButton);
+            //画面内に閉じるボタン追加のため、削除
+            //Button closeButton = new Button() { Content = new TextBlock() { Text = "✖" } };
+            //closeButton.Click += (sender, e) =>
+            //{
+            //    RemoveTab(mainInstance, tabItem);
+            //};
+            //stackPanel.Children.Add(closeButton);
             tabItem.Content = mainInstance;
             tabItem.Header = stackPanel;
+            mainInstance.tabItem = tabItem; //TabItem保持
             TabItems.Add(tabItem);
             LastTabNumber = index;
         }

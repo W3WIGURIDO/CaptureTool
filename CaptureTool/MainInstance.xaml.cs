@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace CaptureTool
 {
@@ -21,6 +22,8 @@ namespace CaptureTool
     public partial class MainInstance : UserControl
     {
         public Settings settings;
+        public System.Windows.Controls.TabItem tabItem; //閉じる際にTabItem参照用
+
         public MainInstance(int tabNumber)
         {
             settings = new Settings(tabNumber);
@@ -58,6 +61,11 @@ namespace CaptureTool
         private void viewWindowButton_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.GetMainWindowDataContext().ViewWindowTab();
+        }
+
+        private void closeTabButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.GetMainWindowDataContext().RemoveTab(this, tabItem);
         }
     }
 }
