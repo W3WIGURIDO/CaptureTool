@@ -96,7 +96,8 @@ namespace CaptureTool
 
         private void AddTabButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowDataContext.AddTab(mainWindowDataContext.LastTabNumber + 1);
+            // [2026-05-11 変更] 常に末尾番号+1ではなく、最小の未使用番号でタブを開く
+            mainWindowDataContext.AddTab(mainWindowDataContext.GetNextTabNumber());
         }
 
         private void mainTabCtl_SelectionChanged(object sender, SelectionChangedEventArgs e)

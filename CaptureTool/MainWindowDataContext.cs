@@ -97,5 +97,17 @@ namespace CaptureTool
         public RoutedCommand RefFolderCom { get; set; } = new RoutedCommand();
 
         public int LastTabNumber { get; set; } = 0;
+
+        // [2026-05-11 追加] 使用中のタブ番号から最小の未使用番号を返す
+        public int GetNextTabNumber()
+        {
+            var usedNumbers = new HashSet<int>(UserControls.Select(uc => uc.settings.TabNumber));
+            int next = 0;
+            while (usedNumbers.Contains(next))
+            {
+                next++;
+            }
+            return next;
+        }
     }
 }
