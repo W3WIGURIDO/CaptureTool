@@ -270,6 +270,13 @@ namespace CaptureTool
             {
                 try
                 {
+
+                    // [2026-05-11 追加] patternが空の場合はReplace/Regexがエラーになるためスキップ
+                    if (string.IsNullOrEmpty(setting.pattern))
+                    {
+                        continue;
+                    }
+
                     if (setting.isRegex == true)
                     {
                         tmpStr = System.Text.RegularExpressions.Regex.Replace(tmpStr, setting.pattern, setting.replacement);
