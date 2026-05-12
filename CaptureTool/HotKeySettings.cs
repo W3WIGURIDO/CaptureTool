@@ -117,37 +117,41 @@ namespace CaptureTool
                             }, System.Windows.Threading.DispatcherPriority.Send);
                         });
                     }
-                    //var positionSet = settings.ViewPosition[settings.ViewPosition.Keys.ElementAt(settings.PositionIndex)];
-                    //string imageFormatSelectStr = settings.SaveFormats[settings.SaveFormats.Keys.ElementAt(settings.SaveFormatIndex)];
                     Task.Run(() =>
                     {
                         if (visibilityControl)
                         {
                             System.Threading.Thread.Sleep(200);
                         }
-                        targetWindow.Dispatcher.Invoke(() =>
-                        {
-                            //string compressOption = "";
-                            //if (settings.CompressSelect == CompressType.Optipng)
-                            //{
-                            //    compressOption = settings.CompressNums.Keys.ElementAt(settings.CompressIndex);
-                            //}
-                            //else if (settings.CompressSelect == CompressType.Zopfli)
-                            //{
-                            //    compressOption = settings.CompressNumsZopfli.Keys.ElementAt(settings.CompressIndexZopfli);
-                            //}
-                            //if (MainProcess.CaptureScreen(settings.SampleFileName, settings.Directory, imageFormatName: imageFormatSelectStr, overlayTime: settings.OverlayTimeInt, enableOverlay: settings.EnableOverlay == true, overlayHorizontalAlignment: positionSet.HorizontalAlignment, overlayVerticalAlignment: positionSet.VerticalAlignment, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName), aero: settings.EnableAero == true, enableCursor: settings.EnableCursor == true, captureMode: settings.CaptureModeIndex, imageGridWidth: settings.OverlayX, imageGridHeight: settings.OverlayY, enableSetArrow: settings.EnableSetArrow == true, pixelFormat: settings.PixelFormats.Keys.ElementAt(settings.PixelFormatIndex), compressMode: (int)settings.CompressSelect, compressOption: compressOption, enabledOvarlayTabName: settings.OverlayTabNameEnabled == true, tabNumber: settings.TabNumber, enabledOverlayFileName: settings.OverlayFileNameEnabled == true))
-                            if (MainProcess.CaptureScreen(settings, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName)))
-                            {
-                                settings.NumberCount++;
-                            }
-                        });
-                        if (visibilityControl)
+                        // [2026-05-12 修正] Task.Run内の例外はtry-catchで補足されないため、
+                        // visibilityControlが有効な場合にDispatcher.Invoke失敗等で
+                        // Visibility = Visibleへの復元が行われずウィンドウが消失する問題を修正
+                        try
                         {
                             targetWindow.Dispatcher.Invoke(() =>
                             {
-                                targetWindow.Visibility = Visibility.Visible;
-                            }, System.Windows.Threading.DispatcherPriority.Background);
+                                if (MainProcess.CaptureScreen(settings, screenFlag: ScreenCapture.Equals(tmpHotKey.HotKeyName)))
+                                {
+                                    settings.NumberCount++;
+                                }
+                            });
+                        }
+                        finally
+                        {
+                            if (visibilityControl)
+                            {
+                                try
+                                {
+                                    targetWindow.Dispatcher.Invoke(() =>
+                                    {
+                                        targetWindow.Visibility = Visibility.Visible;
+                                    }, System.Windows.Threading.DispatcherPriority.Background);
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("ウィンドウ再表示失敗: " + ex.Message);
+                                }
+                            }
                         }
                     });
                 }
