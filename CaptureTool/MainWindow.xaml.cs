@@ -81,15 +81,28 @@ namespace CaptureTool
             {
                 if (mainWindowDataContext.UserControls[mainTabCtl.SelectedIndex].settings.EnableTray == true)
                 {
+                    // [2026-05-11 修正] 既存のnotifyIconをDisposeしてから新規作成（二重生成防止）
+                    if (notifyIcon != null)
+                    {
+                        notifyIcon.Dispose();
+                        notifyIcon = null;
+                    }
                     Visibility = Visibility.Hidden;
                     notifyIcon = new NotifyIconWrapper(this);
                 }
             }
-            else if (WindowState == WindowState.Normal)
+            else if (WindowState == WindowState.Normal || WindowState == WindowState.Maximized)
             {
+                // [2026-05-11 修正] スリープ復帰・モニター再接続時にOSが自動でウィンドウを
+                // 復元した際、Visibilityが Hidden のまま残りプロセスのみ残存する問題を修正
+                if (Visibility != Visibility.Visible)
+                {
+                    Visibility = Visibility.Visible;
+                }
                 if (notifyIcon != null)
                 {
                     notifyIcon.Dispose();
+                    notifyIcon = null;
                 }
             }
         }
