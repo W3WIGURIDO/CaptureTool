@@ -54,7 +54,8 @@ namespace CaptureTool
             mainWindowDataContext.RefFolderCom.InputGestures.Add(new KeyGesture(Key.R, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(mainWindowDataContext.RefFolderCom, ClickRefCall));
             DataContext = mainWindowDataContext;
-            logger = new Logger(AppDomain.CurrentDomain.BaseDirectory + "log.txt", 0);
+            // [2026-05-12 変更] App.xaml.csで初期化済みの共有インスタンスを使用する
+            logger = Logger.Default;
         }
 
         public void ClickRefCall(object sender, RoutedEventArgs e)
@@ -72,7 +73,8 @@ namespace CaptureTool
                     mainInstance.settings.SaveSettings();
                 }
             }
-            logger?.Dispose();
+            // [2026-05-12 削除] Loggerの破棄はApplication_Exitで行うため削除
+            // logger?.Dispose();
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
