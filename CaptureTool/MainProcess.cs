@@ -21,9 +21,10 @@ namespace CaptureTool
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
 
+        // [修正] IntPtrを使用してx64の64bitポインタに対応する
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, int flags);
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, int flags);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -151,6 +152,8 @@ namespace CaptureTool
         [DllImport("user32.dll")]
         public static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO pIconInfo);
 
+        // [修正] x64でのアライメントを明示的に保証する
+        [StructLayout(LayoutKind.Sequential)]
         public struct ICONINFO
         {
             public bool fIcon;
@@ -197,13 +200,15 @@ namespace CaptureTool
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
+        // [修正] Win32のPOINT相当の型を使う
+        [StructLayout(LayoutKind.Sequential)]
         public struct WINDOWPLACEMENT
         {
             public int length;
             public int flags;
             public int showCmd;
-            public System.Windows.Point ptMinPosition;
-            public System.Windows.Point ptMaxPosition;
+            public System.Drawing.Point ptMinPosition;  // System.Windows.Point(double)ではなくSystem.Drawing.Point(int)を使用
+            public System.Drawing.Point ptMaxPosition;
             public Rectangle rcNormalPosition;
         }
 
