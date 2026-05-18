@@ -720,6 +720,29 @@ namespace CaptureTool
             get => _CompressNumsZopfli;
         }
 
+        // [2026-05-15 追加] Oxipng圧縮レベル（x64専用）
+        private int _CompressIndexOxipng;
+        public int CompressIndexOxipng
+        {
+            get => _CompressIndexOxipng;
+            set
+            {
+                _CompressIndexOxipng = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CompressIndexOxipng));
+            }
+        }
+
+        // [2026-05-15 追加] Oxipng最適化レベル定義（-o0〜-o6）
+        private readonly Dictionary<string, string> _CompressNumsOxipng = new Dictionary<string, string>() { { "-o 0", "0" }, { "-o 1", "1" }, { "-o 2", "2" }, { "-o 3", "3" }, { "-o 4", "4" }, { "-o 5", "5" }, { "-o 6", "6" } };
+        public Dictionary<string, string> CompressNumsOxipng
+        {
+            get => _CompressNumsOxipng;
+        }
+
+        // [2026-05-15 追加] x64プロセスで実行中かどうか（Oxipng利用可否判定用）
+        public bool IsX64Process => Environment.Is64BitProcess;
+
         private CompressType _CompressSelect;
         public CompressType CompressSelect
         {
@@ -1179,6 +1202,7 @@ namespace CaptureTool
                 CaptureModeIndex = GetIntFromString(nameof(CaptureModeIndex), 1);
                 CompressIndex = GetIntFromString(nameof(CompressIndex), 0);
                 CompressIndexZopfli = GetIntFromString(nameof(CompressIndexZopfli), 0);
+                CompressIndexOxipng = GetIntFromString(nameof(CompressIndexOxipng), 0);                // [2026-05-15 追加] Oxipng圧縮レベルの読み込み
                 IpHostTransSettingIndex = GetIntFromString(nameof(IpHostTransSettingIndex), 0);
 
                 bool GetBoolFromString(string name, bool defaultBool)
@@ -1294,6 +1318,7 @@ namespace CaptureTool
                 new XElement("FavDirValues", ToStringFavDirValues()),
                 new XElement(nameof(CompressIndex), CompressIndex.ToString()),
                 new XElement(nameof(CompressIndexZopfli), CompressIndexZopfli.ToString()),
+                new XElement(nameof(CompressIndexOxipng), CompressIndexOxipng.ToString()),
                 new XElement(nameof(CompressSelect), Enum.GetName(typeof(CompressType), CompressSelect)),
                 new XElement(nameof(TopMost), TopMost.ToString()),
                 new XElement(nameof(EnableViewKeyBind), EnableViewKeyBind.ToString()),
@@ -1348,6 +1373,7 @@ namespace CaptureTool
             EnableVisibilityControl = true;
             CountConju = "_";
             CompressIndex = 0;
+            CompressIndexOxipng = 0;            // [2026-05-15 追加] Oxipng圧縮レベルのリセット
             EnableAutoSave = true;
             EnableAero = true;
             TopMost = false;
@@ -1392,6 +1418,8 @@ namespace CaptureTool
 
     public enum CompressType
     {
-        None, Optipng, Zopfli
+        None, Optipng, Zopfli,
+        // [2026-05-15 追加] Oxipng（x64専用DLL使用のためx64プロセスでのみ有効）
+        Oxipng
     }
 }

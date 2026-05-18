@@ -1,17 +1,18 @@
-﻿using System;
+﻿using OxipngInterop;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using System.Windows.Media;
+using System.Diagnostics;
 using System.Drawing;
-using System.Windows;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CaptureTool
 {
@@ -450,6 +451,12 @@ namespace CaptureTool
             {
                 compressOption = settings.CompressNumsZopfli.Keys.ElementAt(settings.CompressIndexZopfli);
             }
+            // [2026-05-15 追加] Oxipng（x64専用）の圧縮オプション設定
+            else if (settings.CompressSelect == CompressType.Oxipng)
+            {
+                compressOption = settings.CompressNumsOxipng.Keys.ElementAt(settings.CompressIndexOxipng);
+            }
+
             bool enabledOvarlayTabName = settings.OverlayTabNameEnabled == true;
             int tabNumber = settings.TabNumber;
             bool enabledOverlayFileName = settings.OverlayFileNameEnabled == true;
@@ -554,8 +561,17 @@ namespace CaptureTool
                     prevOverlayWindow = null;
                 }
 
-                using (Bitmap bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat))
+                ImageSource imageSource = null;
+                Bitmap bitmap = null;
+                bool taskOwnsBitmap = false;
+                try
                 {
+                    bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat);
+                    //画面表示用
+                    //[2026/05/18]bitmapの競合回避のため、作成タイミングを変更
+                    imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
+                    imageSource.Freeze();
+
                     ImageFormat imageFormat;
                     if (imageFormatName.ToUpper().CompareTo("PNG") == 0)
                     {
@@ -581,12 +597,6 @@ namespace CaptureTool
                                 ProcessStartInfo compressStartInfo = new ProcessStartInfo(callCompressPath, string.Format("\"{0}\" \"{1}\" {2}", optipngPath, fullPath, compressOption)) { WindowStyle = ProcessWindowStyle.Hidden };
                                 Process.Start(compressStartInfo);
                             });
-
-                            //Task.Run(() =>
-                            //{
-                            //    ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "optipng.exe", fullPath + " " + compressOption) { WindowStyle = ProcessWindowStyle.Hidden };
-                            //    Process.Start(compressStartInfo);
-                            //});
                         }
                         else if (compressMode == 2)
                         {
@@ -600,12 +610,20 @@ namespace CaptureTool
                                 ProcessStartInfo compressStartInfo = new ProcessStartInfo(callCompressPath, string.Format("\"{0}\" {1} \"{2}\" \"{3}\"", zopflipngPath, compressOption, tmpName, fullPath)) { WindowStyle = ProcessWindowStyle.Hidden };
                                 Process.Start(compressStartInfo);
                             });
-
-                            //Task.Run(() =>
-                            //{
-                            //    ProcessStartInfo compressStartInfo = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory + "zopflipng.exe", compressOption + " " + tmpName + " " + fullPath) { WindowStyle = ProcessWindowStyle.Hidden };
-                            //    Process.Start(compressStartInfo);
-                            //});
+                        }
+                        // [2026-05-15 追加] Oxipng（x64専用）による圧縮
+                        // oxipng.dll（x64）を使用したインプロセス圧縮処理
+                        else if (compressMode == 3)
+                        {
+                            taskOwnsBitmap = true;
+                            Task.Run(() =>
+                            {
+                                using (bitmap)
+                                {
+                                    byte[] png = OxipngOptimizer.OptimizeBitmap(bitmap);
+                                    File.WriteAllBytes(fullPath, png);
+                                }
+                            });
                         }
                         else
                         {
@@ -616,46 +634,50 @@ namespace CaptureTool
                     {
                         bitmap.Save(fullPath, imageFormat);
                     }
+                }
+                finally
+                {
+                    // compressMode 3 以外・例外発生時は必ずここで Dispose
+                    // taskOwnsBitmap=true かつ Task.Run 発行済みの場合は Task 側で Dispose
+                    if (!taskOwnsBitmap)
+                        bitmap?.Dispose();
+                }
 
-                    ImageSource imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
-                    imageSource.Freeze();
-                    if (enableOverlay)
+                if (enableOverlay)
+                {
+                    StringBuilder overlayText = new StringBuilder();
+                    if (enabledOvarlayTabName)
                     {
-                        StringBuilder overlayText = new StringBuilder();
-                        if (enabledOvarlayTabName)
-                        {
-                            overlayText.Append((tabNumber + 1).ToString());
-                            overlayText.Append(": ");
-                        }
-                        if (enabledOverlayFileName)
-                        {
-                            string overlayFilename = "";
-                            try
-                            {
-                                overlayFilename = Path.GetFileName(fullPath);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine(ex.Message);
-                            }
-                            overlayText.Append(overlayFilename);
-                            overlayText.Append(": ");
-                        }
-                        OverlayWindowDataContext overlayWindowDataContext = new OverlayWindowDataContext() { OverlayText = overlayText.ToString() };
-                        OverlayWindow overlayWindow = new OverlayWindow()
-                        {
-                            ImageSource = imageSource,
-                            OverlayTime = overlayTime,
-                            OverlayHorizontalAlignment = overlayHorizontalAlignment,
-                            OverlayVerticalAlignment = overlayVerticalAlignment,
-                            ImageGridWidth = imageGridWidth,
-                            ImageGridHeight = imageGridHeight,
-                            DataContext = overlayWindowDataContext
-                        };
-                        overlayWindow.Show();
-                        prevOverlayWindow = overlayWindow;
+                        overlayText.Append((tabNumber + 1).ToString());
+                        overlayText.Append(": ");
                     }
-
+                    if (enabledOverlayFileName)
+                    {
+                        string overlayFilename = "";
+                        try
+                        {
+                            overlayFilename = Path.GetFileName(fullPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                        overlayText.Append(overlayFilename);
+                        overlayText.Append(": ");
+                    }
+                    OverlayWindowDataContext overlayWindowDataContext = new OverlayWindowDataContext() { OverlayText = overlayText.ToString() };
+                    OverlayWindow overlayWindow = new OverlayWindow()
+                    {
+                        ImageSource = imageSource,
+                        OverlayTime = overlayTime,
+                        OverlayHorizontalAlignment = overlayHorizontalAlignment,
+                        OverlayVerticalAlignment = overlayVerticalAlignment,
+                        ImageGridWidth = imageGridWidth,
+                        ImageGridHeight = imageGridHeight,
+                        DataContext = overlayWindowDataContext
+                    };
+                    overlayWindow.Show();
+                    prevOverlayWindow = overlayWindow;
                 }
             }
             catch (Exception ex)

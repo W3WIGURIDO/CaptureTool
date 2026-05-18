@@ -43,11 +43,21 @@
                     </StackPanel>
                 </RadioButton.Content>
             </RadioButton>
-            <RadioButton x:Name="zopCheck" GroupName="compressRadio" Margin="0,0,0,4" IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=Zopfli,UpdateSourceTrigger=PropertyChanged}">
+            <RadioButton x:Name="zopCheck" GroupName="compressRadio" Margin="0,0,40,4" IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=Zopfli,UpdateSourceTrigger=PropertyChanged}">
                 <RadioButton.Content>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Zopfli" VerticalAlignment="Center" ToolTip="数値が高いほど高圧縮かつ処理に時間がかかります。" Margin="2,0" Width="60"/>
                         <ComboBox x:Name="compressSelectZopfli" SelectedIndex="{Binding CompressIndexZopfli}" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" ItemsSource="{Binding CompressNumsZopfli}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsChecked,ElementName=zopCheck}"/>
+                    </StackPanel>
+                </RadioButton.Content>
+            </RadioButton>
+            <!-- [2026-05-15 追加] Oxipng（x64プロセスでのみ有効） -->
+            <RadioButton x:Name="oxipngCheck" GroupName="compressRadio" Margin="0,0,40,4" IsEnabled="{Binding IsX64Process}"
+                         IsChecked="{Binding Path=CompressSelect,Mode=TwoWay,Converter={StaticResource EnumToBoolean},ConverterParameter=Oxipng,UpdateSourceTrigger=PropertyChanged}">
+                <RadioButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Oxipng" VerticalAlignment="Center" ToolTip="x64専用。数値が高いほど高圧縮かつ処理に時間がかかります。" Margin="2,0" Width="60"/>
+                        <ComboBox x:Name="compressSelectOxipng" SelectedIndex="{Binding CompressIndexOxipng}" VerticalAlignment="Center" Width="40" HorizontalAlignment="Left" ItemsSource="{Binding CompressNumsOxipng}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsChecked,ElementName=oxipngCheck}"/>
                     </StackPanel>
                 </RadioButton.Content>
             </RadioButton>
