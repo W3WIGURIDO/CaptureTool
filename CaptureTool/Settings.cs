@@ -733,8 +733,10 @@ namespace CaptureTool
             }
         }
 
-        // [2026-05-15 追加] Oxipng最適化レベル定義（-o0〜-o6）
-        private readonly Dictionary<string, string> _CompressNumsOxipng = new Dictionary<string, string>() { { "-o 0", "0" }, { "-o 1", "1" }, { "-o 2", "2" }, { "-o 3", "3" }, { "-o 4", "4" }, { "-o 5", "5" }, { "-o 6", "6" } };
+        // [2026-05-15 追加] Oxipng最適化レベル定義（0〜6）
+        // [2026-05-18 修正] キーをCLI文字列("-o N")からレベル数値文字列("N")に変更
+        // DLL呼び出しではCLI文字列を使用しないため、CompressIndexOxipngを直接OptLevelに使用する
+        private readonly Dictionary<string, string> _CompressNumsOxipng = new Dictionary<string, string>() { { "0", "0" }, { "1", "1" }, { "2", "2" }, { "3", "3" }, { "4", "4" }, { "5", "5" }, { "6", "6" } };
         public Dictionary<string, string> CompressNumsOxipng
         {
             get => _CompressNumsOxipng;

@@ -451,11 +451,6 @@ namespace CaptureTool
             {
                 compressOption = settings.CompressNumsZopfli.Keys.ElementAt(settings.CompressIndexZopfli);
             }
-            // [2026-05-15 追加] Oxipng（x64専用）の圧縮オプション設定
-            else if (settings.CompressSelect == CompressType.Oxipng)
-            {
-                compressOption = settings.CompressNumsOxipng.Keys.ElementAt(settings.CompressIndexOxipng);
-            }
 
             bool enabledOvarlayTabName = settings.OverlayTabNameEnabled == true;
             int tabNumber = settings.TabNumber;
@@ -611,17 +606,28 @@ namespace CaptureTool
                                 Process.Start(compressStartInfo);
                             });
                         }
-                        // [2026-05-15 追加] Oxipng（x64専用）による圧縮
-                        // oxipng.dll（x64）を使用したインプロセス圧縮処理
+                        // [2026-05-18 実装] Oxipng（x64専用）による圧縮
+                        // DLLデフォルトオプションとの差異はOptLevelのみのため、簡易オーバーロードで対応する
                         else if (compressMode == 3)
                         {
                             taskOwnsBitmap = true;
+                            // CompressIndexOxipng（0〜6）をOptLevelに直接使用する
+                            // stripSafe=true, optimizeAlpha=false はDLLデフォルト値と一致
+                            int oxipngLevel = settings.CompressIndexOxipng;
                             Task.Run(() =>
                             {
                                 using (bitmap)
                                 {
-                                    byte[] png = OxipngOptimizer.OptimizeBitmap(bitmap);
-                                    File.WriteAllBytes(fullPath, png);
+                                    byte[] png = OxipngOptimizer.OptimizeBitmap(bitmap, oxipngLevel);
+                                    if (png != null)
+                                    {
+                                        File.WriteAllBytes(fullPath, png);
+                                    }
+                                    else
+                                    {
+                                        // [2026-05-18] 最適化失敗時（不正PNG等）は非圧縮で保存する
+                                        bitmap.Save(fullPath, ImageFormat.Png);
+                                    }
                                 }
                             });
                         }
