@@ -20,6 +20,9 @@ namespace CaptureTool
     public partial class TabWindow : Window
     {
         private MainInstance mainInstance;
+        // [2026-05-19 追加] メイン画面に戻す操作中のフラグ（Window_Closingでの二重処理を防ぐ）
+        private bool _returningToMain = false;
+
         public TabWindow(MainInstance mainInstance)
         {
             InitializeComponent();
@@ -27,12 +30,25 @@ namespace CaptureTool
             mainInstance.mainGrid.Margin = new Thickness(5);
             Content = mainInstance;
             Title = (mainInstance.settings.TabNumber + 1).ToString();
-            mainInstance.viewWindowButton.IsEnabled = false;
+            // [2026-05-19 変更] ボタンを無効化する代わりに「メインに戻す」に切り替える
+            mainInstance.SetTabWindowMode(true, this);
+        }
+
+        // [2026-05-19 追加] メイン画面のタブに戻す（MainInstanceのボタンから呼び出される）
+        public void ReturnToMain()
+        {
+            _returningToMain = true;
+            MainWindow.GetMainWindowDataContext().ReturnTabToMain(mainInstance, this);
+            Close();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // [2026-05-19 修正] TabWindowsリストから自身を削除し、設定保存・終了判定を行う
+            // [2026-05-19 変更] メインに戻す操作の場合はReturnTabToMain側で処理済みのためスキップ
+            if (_returningToMain)
+            {
+                return;
+            }
             var ctx = MainWindow.GetMainWindowDataContext();
             ctx.UserControls.Remove(mainInstance);
             ctx.TabWindows.Remove(this);

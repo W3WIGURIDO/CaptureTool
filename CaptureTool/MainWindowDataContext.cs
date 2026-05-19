@@ -95,6 +95,30 @@ namespace CaptureTool
             tabWindow.Show();
         }
 
+        // [2026-05-19 追加] 別ウィンドウ表示中のタブをメイン画面のタブに戻す
+        public void ReturnTabToMain(MainInstance mainInstance, TabWindow tabWindow)
+        {
+            TabWindows.Remove(tabWindow);
+
+            // TabWindowで設定したMarginをリセットしてMainWindowのTabItem用レイアウトに戻す
+            mainInstance.mainGrid.Margin = new System.Windows.Thickness(0);
+            mainInstance.SetTabWindowMode(false);
+
+            TabItem tabItem = new TabItem();
+            StackPanel stackPanel = new StackPanel() { Orientation = Orientation.Horizontal };
+            stackPanel.Children.Add(new TextBlock()
+            {
+                Text = (mainInstance.settings.TabNumber + 1).ToString(),
+                Margin = new System.Windows.Thickness(0, 0, 4, 0)
+            });
+            tabItem.Content = mainInstance;
+            tabItem.Header = stackPanel;
+            mainInstance.tabItem = tabItem;
+            TabItems.Add(tabItem);
+            TabSelectedIndex = TabItems.Count - 1;
+            RaisePropertyChanged(nameof(TabSelectedIndex));
+        }
+
         public int TabSelectedIndex { get; set; }
         public RoutedCommand RefFolderCom { get; set; } = new RoutedCommand();
 

@@ -22,7 +22,11 @@ namespace CaptureTool
     public partial class MainInstance : UserControl
     {
         public Settings settings;
-        public System.Windows.Controls.TabItem tabItem; //閉じる際にTabItem参照用
+        public System.Windows.Controls.TabItem tabItem;
+
+        // [2026-05-19 追加] 別ウィンドウ表示中かどうかのフラグと親TabWindowの参照
+        private bool _isInTabWindow = false;
+        private TabWindow _ownerTabWindow = null;
 
         public MainInstance(int tabNumber)
         {
@@ -31,7 +35,15 @@ namespace CaptureTool
             this.DataContext = settings;
             settings.OwnerInstance = this;
             settings.HotKeySettings = new HotKeySettings(settings);
-            //settings.HotKeySettings.StartHotKey();
+        }
+
+        // [2026-05-19 追加] 別ウィンドウ表示モードを切り替える（ボタン表示・動作の切り替え）
+        public void SetTabWindowMode(bool isInTabWindow, TabWindow ownerTabWindow = null)
+        {
+            _isInTabWindow = isInTabWindow;
+            _ownerTabWindow = ownerTabWindow;
+            viewWindowButton.Content = isInTabWindow ? "メインに戻す" : "別ウィンドウで表示";
+            viewWindowButton.IsEnabled = true;
         }
 
         private void InvisibleButton_GotFocus(object sender, RoutedEventArgs e)
@@ -60,7 +72,15 @@ namespace CaptureTool
 
         private void viewWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.GetMainWindowDataContext().ViewWindowTab();
+            // [2026-05-19 変更] 別ウィンドウ表示中は「メインに戻す」動作に切り替える
+            if (_isInTabWindow && _ownerTabWindow != null)
+            {
+                _ownerTabWindow.ReturnToMain();
+            }
+            else
+            {
+                MainWindow.GetMainWindowDataContext().ViewWindowTab();
+            }
         }
 
         private void closeTabButton_Click(object sender, RoutedEventArgs e)
