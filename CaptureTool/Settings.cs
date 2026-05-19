@@ -1375,7 +1375,8 @@ namespace CaptureTool
             EnableVisibilityControl = true;
             CountConju = "_";
             CompressIndex = 0;
-            CompressIndexOxipng = 0;            // [2026-05-15 追加] Oxipng圧縮レベルのリセット
+            CompressIndexOxipng = 6;            // [2026-05-15 追加] Oxipng圧縮レベルのリセット
+            CompressSelect = CompressType.Oxipng;            // [2026-05-18 修正] デフォルト圧縮方式をOxipngに変更
             EnableAutoSave = true;
             EnableAero = true;
             TopMost = false;
