@@ -65,7 +65,16 @@ namespace CaptureTool
 
         private void closeTabButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.GetMainWindowDataContext().RemoveTab(this, tabItem);
+            // [2026-05-19 修正] TabWindowに表示されている場合はTabWindow自体を閉じる
+            Window parentWindow = Window.GetWindow(this);
+            if (parentWindow is TabWindow tabWindow)
+            {
+                tabWindow.Close();
+            }
+            else
+            {
+                MainWindow.GetMainWindowDataContext().RemoveTab(this, tabItem);
+            }
         }
     }
 }

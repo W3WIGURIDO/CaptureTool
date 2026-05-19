@@ -73,8 +73,11 @@ namespace CaptureTool
                     mainInstance.settings.SaveSettings();
                 }
             }
-            // [2026-05-12 削除] Loggerの破棄はApplication_Exitで行うため削除
-            // logger?.Dispose();
+            // [2026-05-19 追加] 別ウィンドウ表示中のタブも保存して閉じる
+            foreach (var tabWindow in mainWindowDataContext.TabWindows.ToList())
+            {
+                tabWindow.Close();
+            }
         }
 
         private void Window_StateChanged(object sender, EventArgs e)

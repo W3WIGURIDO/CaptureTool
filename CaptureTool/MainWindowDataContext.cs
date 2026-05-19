@@ -79,6 +79,8 @@ namespace CaptureTool
             UserControls.Remove(mainInstance);
             TabItems.Remove(tabItem);
             mainInstance.settings.HotKeySettings.DisposeHotKeys();
+            // [2026-05-19 追加] 全タブが閉じられた場合はアプリを終了する
+            CheckAndExitIfEmpty();
         }
 
         private List<System.Windows.Window> _TabWindows = new List<System.Windows.Window>();
@@ -97,6 +99,14 @@ namespace CaptureTool
         public RoutedCommand RefFolderCom { get; set; } = new RoutedCommand();
 
         public int LastTabNumber { get; set; } = 0;
+        // [2026-05-19 追加] 全タブが閉じられた場合はアプリを終了する
+        public void CheckAndExitIfEmpty()
+        {
+            if (UserControls.Count == 0)
+            {
+                System.Windows.Application.Current.Shutdown();
+            }
+        }
 
         // [2026-05-11 追加] 使用中のタブ番号から最小の未使用番号を返す
         public int GetNextTabNumber()

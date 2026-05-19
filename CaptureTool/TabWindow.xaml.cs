@@ -32,8 +32,17 @@ namespace CaptureTool
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            MainWindow.GetMainWindowDataContext().UserControls.Remove(mainInstance);
+            // [2026-05-19 修正] TabWindowsリストから自身を削除し、設定保存・終了判定を行う
+            var ctx = MainWindow.GetMainWindowDataContext();
+            ctx.UserControls.Remove(mainInstance);
+            ctx.TabWindows.Remove(this);
             mainInstance.settings.HotKeySettings.DisposeHotKeys();
+            if (mainInstance.settings.EnableAutoSave == true)
+            {
+                mainInstance.settings.SaveSettings();
+            }
+            // [2026-05-19 追加] 全タブが閉じられた場合はアプリを終了する
+            ctx.CheckAndExitIfEmpty();
         }
     }
 }
