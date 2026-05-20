@@ -606,7 +606,7 @@ namespace CaptureTool
                                 Process.Start(compressStartInfo);
                             });
                         }
-                        // [2026-05-18 実装] Oxipng（x64専用）による圧縮
+                        // [2026-05-20 実装] Oxipng（x64専用）による圧縮
                         // DLLデフォルトオプションとの差異はOptLevelのみのため、簡易オーバーロードで対応する
                         else if (compressMode == 3)
                         {
@@ -614,6 +614,9 @@ namespace CaptureTool
                             // CompressIndexOxipng（0〜6）をOptLevelに直接使用する
                             // stripSafe=true, optimizeAlpha=false はDLLデフォルト値と一致
                             int oxipngLevel = settings.CompressIndexOxipng;
+                            // [2026-05-20 追加] 連射時の名前衝突を防ぐためダミーファイルで先にパスを確保する
+                            // File.WriteAllBytabytesはFileMode.Create（上書き）で動作するため削除不要
+                            File.Create(fullPath).Dispose();
                             Task.Run(() =>
                             {
                                 using (bitmap)
