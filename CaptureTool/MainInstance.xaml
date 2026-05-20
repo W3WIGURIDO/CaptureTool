@@ -24,11 +24,15 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <!-- [2026-05-19 追加] 履歴ボタン列 -->
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Button x:Name="saveButton" Content="設定保存" Click="ClickSave" ToolTip="設定値を保存します。"/>
                 <Button x:Name="instanceSettingButton" Content="詳細設定(個別)" Click="instanceSettingButton_Click" Grid.Column="1" ToolTip="キャプチャツールの設定を行います。設定値はタブごとに別となっています。"/>
                 <Button x:Name="viewWindowButton" Content="別ウィンドウで表示" Grid.Column="2" Click="viewWindowButton_Click" ToolTip="タブを別ウィンドウで表示します。"/>
                 <Button x:Name="closeTabButton" Content="閉じる" Grid.Column="3" ToolTip="タブを別ウィンドウで表示します。" Click="closeTabButton_Click"/>
+                <!-- [2026-05-19 追加] キャプチャ履歴ウィンドウを開く -->
+                <Button x:Name="historyButton" Content="履歴" Grid.Column="4" Click="historyButton_Click" ToolTip="このセッションで取得したキャプチャ履歴を表示します。"/>
             </Grid>
             <pages:KeyBind Visibility="{Binding EnableViewKeyBind,Converter={StaticResource BoolVisibilityConverter}}"/>
             <pages:KeyBindingViewer Visibility="{Binding EnableViewKeyBindingViewer,Converter={StaticResource BoolVisibilityConverter}}"/>

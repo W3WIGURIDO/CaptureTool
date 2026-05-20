@@ -649,6 +649,10 @@ namespace CaptureTool
                         bitmap?.Dispose();
                 }
 
+                // [2026-05-19 追加] キャプチャ成功時に履歴へ追加
+                // fullPathとsettings.TabNumberはここで確定済み
+                CaptureHistoryManager.Add(new CaptureHistoryItem(fullPath, settings.TabNumber, DateTime.Now));
+
                 if (enableOverlay)
                 {
                     StringBuilder overlayText = new StringBuilder();

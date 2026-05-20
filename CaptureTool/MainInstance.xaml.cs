@@ -96,5 +96,11 @@ namespace CaptureTool
                 MainWindow.GetMainWindowDataContext().RemoveTab(this, tabItem);
             }
         }
+
+        // [2026-05-19 追加] キャプチャ履歴ウィンドウを開く（既に開いている場合は前面に出す）
+        private void historyButton_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryWindow.ShowOrActivate(settings.TopMost);
+        }
     }
 }

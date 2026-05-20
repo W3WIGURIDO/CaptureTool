@@ -82,7 +82,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CaptureHistoryItem.cs" />
+    <Compile Include="CaptureHistoryManager.cs" />
     <Compile Include="Extend.cs" />
+    <Compile Include="HistoryItemViewModel.cs" />
+    <Compile Include="HistoryWindow.xaml.cs">
+      <DependentUpon>HistoryWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HotKeySettings.cs" />
     <Compile Include="InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
@@ -149,10 +155,15 @@
     <Compile Include="SettingWindows\WindowTitleReplaceSettingWindow.xaml.cs">
       <DependentUpon>WindowTitleReplaceSettingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ShellThumbnail.cs" />
     <Compile Include="TabWindow.xaml.cs">
       <DependentUpon>TabWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="VisibilityAnimation.cs" />
+    <Page Include="HistoryWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
