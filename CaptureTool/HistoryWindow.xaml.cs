@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace CaptureTool
@@ -38,20 +40,16 @@ namespace CaptureTool
             Topmost = topMost;
             historyListBox.ItemsSource = _viewModels;
 
-            // 既存アイテムのViewModel生成（最新が先頭のため順序はそのまま）
             foreach (var item in CaptureHistoryManager.Items)
                 _viewModels.Add(new HistoryItemViewModel(item));
 
             UpdateCountLabel();
 
-            // 以後の追加・削除をViewModelコレクションに同期する
             CaptureHistoryManager.Items.CollectionChanged += OnSourceCollectionChanged;
 
-            // 全件のサムネイルを非同期ロード
             LoadAllThumbnailsAsync();
         }
 
-        // ウィンドウ表示中に新たなキャプチャが追加された場合の同期処理
         private void OnSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -61,11 +59,9 @@ namespace CaptureTool
                     var vm = new HistoryItemViewModel(item);
                     _viewModels.Insert(0, vm);
 
-                    // ViewModelも上限に合わせて末尾を削除
                     while (_viewModels.Count > CaptureHistoryManager.DefaultMaxCount)
                         _viewModels.RemoveAt(_viewModels.Count - 1);
 
-                    // 追加分のサムネイルを非同期ロード（fire-and-forget）
                     _ = vm.LoadThumbnailAsync(_cts.Token);
                 }
                 UpdateCountLabel();
@@ -96,6 +92,10 @@ namespace CaptureTool
         private HistoryItemViewModel SelectedSingle
             => historyListBox.SelectedItem as HistoryItemViewModel;
 
+        // ────────────────────────────────────────────────
+        //  ツールバーボタンハンドラ（共通ヘルパーに委譲）
+        // ────────────────────────────────────────────────
+
         private void HistoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             OpenImage(SelectedSingle);
@@ -108,7 +108,62 @@ namespace CaptureTool
 
         private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            var vm = SelectedSingle;
+            OpenFolderItem(SelectedSingle);
+        }
+
+        private void RenameButton_Click(object sender, RoutedEventArgs e)
+        {
+            RenameItem(SelectedSingle);
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = historyListBox.SelectedItems
+                .Cast<HistoryItemViewModel>().ToList();
+            if (selected.Count > 0) DeleteItems(selected);
+        }
+
+        // ────────────────────────────────────────────────
+        //  [2026-05-20 追加] アイテムごとのボタンハンドラ
+        // ────────────────────────────────────────────────
+
+        private void ItemRenameButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is HistoryItemViewModel vm)
+                RenameItem(vm);
+        }
+
+        private void ItemOpenFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is HistoryItemViewModel vm)
+                OpenFolderItem(vm);
+        }
+
+        private void ItemDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is HistoryItemViewModel vm)
+                DeleteItems(new[] { vm });
+        }
+
+        // ────────────────────────────────────────────────
+        //  [2026-05-20 リファクタリング] 共通ヘルパーメソッド
+        //  ツールバー・アイテムボタン双方から呼び出す
+        // ────────────────────────────────────────────────
+
+        private void OpenImage(HistoryItemViewModel vm)
+        {
+            if (vm == null) return;
+            if (!File.Exists(vm.FilePath))
+            {
+                ShowError("ファイルが見つかりません。\n" + vm.FilePath);
+                return;
+            }
+            try { System.Diagnostics.Process.Start(vm.FilePath); }
+            catch (Exception ex) { ShowError(ex.Message); }
+        }
+
+        private void OpenFolderItem(HistoryItemViewModel vm)
+        {
             if (vm == null) return;
             try
             {
@@ -117,9 +172,8 @@ namespace CaptureTool
             catch (Exception ex) { ShowError(ex.Message); }
         }
 
-        private void RenameButton_Click(object sender, RoutedEventArgs e)
+        private void RenameItem(HistoryItemViewModel vm)
         {
-            var vm = SelectedSingle;
             if (vm == null) return;
             if (!File.Exists(vm.FilePath))
             {
@@ -143,26 +197,25 @@ namespace CaptureTool
             try
             {
                 File.Move(vm.FilePath, newPath);
-                vm.FilePath = newPath;  // ViewModelのFilePath経由でItemも更新される
+                vm.FilePath = newPath;
             }
             catch (Exception ex) { ShowError("改名に失敗しました。\n" + ex.Message); }
         }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteItems(IEnumerable<HistoryItemViewModel> vms)
         {
-            var selected = historyListBox.SelectedItems
-                .Cast<HistoryItemViewModel>().ToList();
-            if (selected.Count == 0) return;
+            var list = vms.ToList();
+            if (list.Count == 0) return;
 
-            string msg = selected.Count == 1
-                ? $"{selected[0].FileName} を削除しますか？"
-                : $"選択した {selected.Count} 件を削除しますか？";
+            string msg = list.Count == 1
+                ? $"{list[0].FileName} を削除しますか？"
+                : $"選択した {list.Count} 件を削除しますか？";
 
             if (WpfFolderBrowser.CustomMessageBox.Show(this, msg, "削除確認",
                     MessageBoxButton.OKCancel, MessageBoxImage.Warning,
                     MessageBoxResult.Cancel, MessageBoxOptions.None) != MessageBoxResult.OK) return;
 
-            foreach (var vm in selected)
+            foreach (var vm in list)
             {
                 if (vm.FileExists)
                 {
@@ -170,25 +223,11 @@ namespace CaptureTool
                     catch (Exception ex)
                     {
                         ShowError($"{vm.FileName} の削除に失敗しました。\n" + ex.Message);
-                        continue; // ファイル削除失敗時はリストからも除去しない
+                        continue;
                     }
                 }
-                // ファイルなし状態 or ファイル削除成功 → マネージャーから除去
-                // OnSourceCollectionChanged が ViewModelも除去する
                 CaptureHistoryManager.Items.Remove(vm.Item);
             }
-        }
-
-        private void OpenImage(HistoryItemViewModel vm)
-        {
-            if (vm == null) return;
-            if (!File.Exists(vm.FilePath))
-            {
-                ShowError("ファイルが見つかりません。\n" + vm.FilePath);
-                return;
-            }
-            try { System.Diagnostics.Process.Start(vm.FilePath); }
-            catch (Exception ex) { ShowError(ex.Message); }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

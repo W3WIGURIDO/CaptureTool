@@ -1,7 +1,7 @@
 ﻿<Window x:Class="CaptureTool.HistoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="キャプチャ履歴" Width="680" Height="480"
+        Title="キャプチャ履歴" Width="720" Height="480"
         Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
@@ -26,6 +26,8 @@
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="72"/>
+                            <!-- [2026-05-20 追加] アイテムごとの操作ボタン列 -->
+                            <ColumnDefinition Width="28"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- サムネイル / エラー表示 -->
@@ -57,6 +59,19 @@
                             <TextBlock Text="{Binding CapturedAtText}" FontSize="11"/>
                             <TextBlock Text="{Binding TabLabel}"
                                        FontSize="11" Foreground="DimGray"/>
+                        </StackPanel>
+
+                        <!-- [2026-05-20 追加] アイテムごとの操作ボタン（改名・フォルダを開く・削除） -->
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="2,0,0,0">
+                            <Button Content="✏" ToolTip="改名"
+                                    Padding="2,1" Margin="0,0,0,2"
+                                    Click="ItemRenameButton_Click"/>
+                            <Button Content="↗" ToolTip="フォルダを開く"
+                                    Padding="2,1" Margin="0,0,0,2"
+                                    Click="ItemOpenFolderButton_Click"/>
+                            <Button Content="✕" ToolTip="削除"
+                                    Padding="2,1" Foreground="Red"
+                                    Click="ItemDeleteButton_Click"/>
                         </StackPanel>
 
                         <!-- ファイルなし状態のスタイル -->
