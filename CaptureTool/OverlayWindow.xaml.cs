@@ -41,6 +41,8 @@ namespace CaptureTool
             set
             {
                 imageGrid.Width = value;
+                // [変更] ウィンドウサイズをコンテンツに合わせる
+                Width = value;
             }
         }
 
@@ -49,27 +51,26 @@ namespace CaptureTool
             set
             {
                 imageGrid.Height = value;
+                // [変更] ウィンドウサイズをコンテンツに合わせる
+                Height = value;
             }
         }
 
         public int OverlayTime { get; set; } = 3000;
 
+        // [変更] 最大化廃止に伴い、配置先をgridViewのAlignmentからウィンドウ座標に変更
+        private HorizontalAlignment _overlayHorizontalAlignment = HorizontalAlignment.Left;
         public HorizontalAlignment OverlayHorizontalAlignment
         {
-            get => gridView.HorizontalAlignment;
-            set
-            {
-                gridView.HorizontalAlignment = value;
-            }
+            get => _overlayHorizontalAlignment;
+            set => _overlayHorizontalAlignment = value;
         }
 
+        private VerticalAlignment _overlayVerticalAlignment = VerticalAlignment.Top;
         public VerticalAlignment OverlayVerticalAlignment
         {
-            get => gridView.VerticalAlignment;
-            set
-            {
-                gridView.VerticalAlignment = value;
-            }
+            get => _overlayVerticalAlignment;
+            set => _overlayVerticalAlignment = value;
         }
 
         private bool _ClosingReady = true;
@@ -274,7 +275,37 @@ namespace CaptureTool
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Maximized;
+            // [変更] 最大化を廃止し、選択コーナーへの座標配置に変更
+            // 全画面透過ウィンドウの最大化が D3D12 シェーダーコンパイルを誘発していたため
+            PositionWindow();
+        }
+
+        private void PositionWindow()
+        {
+            // アクティブ画面を取得（カーソル位置のモニター）
+            var screen = System.Windows.Forms.Screen.FromPoint(
+                System.Windows.Forms.Cursor.Position);
+
+            // DPI 変換係数を取得（マルチモニター・高DPI対応）
+            var source = PresentationSource.FromVisual(this);
+            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+            // 作業領域（タスクバーを除く）を論理ピクセルに変換
+            double screenLeft = screen.WorkingArea.Left / dpiX;
+            double screenTop = screen.WorkingArea.Top / dpiY;
+            double screenRight = screen.WorkingArea.Right / dpiX;
+            double screenBottom = screen.WorkingArea.Bottom / dpiY;
+
+            const double margin = 10;
+
+            Left = _overlayHorizontalAlignment == HorizontalAlignment.Right
+                ? screenRight - Width - margin
+                : screenLeft + margin;
+
+            Top = _overlayVerticalAlignment == VerticalAlignment.Bottom
+                ? screenBottom - Height - margin
+                : screenTop + margin;
         }
     }
 

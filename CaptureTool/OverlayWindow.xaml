@@ -5,37 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CaptureTool"
         mc:Ignorable="d"
-        Title="OverlayWindow" Topmost="True" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Width="800" Height="600" Focusable="False" ShowActivated="False" Closing="Window_Closing" Loaded="Window_Loaded">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="10"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="10"/>
-            <RowDefinition/>
-            <RowDefinition Height="10"/>
-        </Grid.RowDefinitions>
-        <Grid x:Name="gridView" Grid.Row="1" Grid.Column="1" Loaded="GridView_Loaded">
-            <Grid x:Name="imageGrid" Width="200" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Rectangle Stroke="Black" Opacity="0.5" Fill="Black"/>
-                <Viewbox>
-                    <Grid>
-                        <Image x:Name="viewImage" Source="{Binding ImageSource,Mode=OneTime}"/>
-                    </Grid>
-                </Viewbox>
-            </Grid>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid Background="Black" Opacity="0.7"/>
-                <TextBlock Text="{Binding OverlayText,Mode=OneTime}" FontWeight="Bold" Foreground="White"/>
-            </Grid>
+        Title="OverlayWindow" Topmost="True" WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent" ShowInTaskbar="False" Width="200" Height="150"
+        Focusable="False" ShowActivated="False"
+        Closing="Window_Closing" Loaded="Window_Loaded">
+    <!-- [変更] 最大化→コーナー配置方式に変更。外枠マージングリッドを廃止 -->
+    <Grid x:Name="gridView" Loaded="GridView_Loaded">
+        <Grid x:Name="imageGrid" Width="200" Height="150">
+            <Rectangle Stroke="Black" Opacity="0.5" Fill="Black"/>
+            <Viewbox>
+                <Grid>
+                    <Image x:Name="viewImage" Source="{Binding ImageSource,Mode=OneTime}"/>
+                </Grid>
+            </Viewbox>
+        </Grid>
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Background="Black" Opacity="0.7"/>
+            <TextBlock Text="{Binding OverlayText,Mode=OneTime}" FontWeight="Bold" Foreground="White"/>
         </Grid>
     </Grid>
 </Window>
