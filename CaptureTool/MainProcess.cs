@@ -713,8 +713,6 @@ namespace CaptureTool
             return Extend.ConvertBitmapToBitmapImage(bitmap);
         }
 
-        private static DesktopDuplication.DesktopDuplicator desktopDuplicator;
-        private static int DesktopDuplicatorNum = -1;
         private static List<System.Windows.Forms.Screen> AllScreens;
         private static Bitmap CaptureControl(IntPtr handle, int mode, bool extend, bool screenFlag, bool aero, bool enableCursor, bool enableSetArrow, System.Drawing.Imaging.PixelFormat pixelFormat)
         {
@@ -816,64 +814,9 @@ namespace CaptureTool
             }
             else if (mode == 3)
             {
-                if (DesktopDuplicatorNum != displayIndex)
-                {
-                    if (desktopDuplicator != null)
-                    {
-                        desktopDuplicator.Dispose();
-                        desktopDuplicator = null;
-                    }
-                    desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
-                    DesktopDuplicatorNum = displayIndex;
-                    desktopDuplicator.GetLatestFrameWithCheck();
-                }
-                DesktopDuplication.DesktopFrame frame = null;
-                int tryCount = 0;
-                StringBuilder message = new StringBuilder();
-                while (tryCount < 3)
-                {
-                    try
-                    {
-                        frame = desktopDuplicator.GetLatestFrameWithCheck();
-                        if (frame == null)
-                        {
-                            message.Append(tryCount + ": " + "frame == null" + "\n");
-                            MainWindow.logger.Error("frame == null");
-                            if (tryCount >= 2)
-                            {
-                                throw new Exception(message.ToString());
-                            }
-                            tryCount++;
-                            System.Threading.Thread.Sleep(3000);
-                            continue;
-                        }
-                        Bitmap dupBitmap = frame.DesktopImage.Clone(new Rectangle(rect.left - activeDisplay.Bounds.Left, rect.top - activeDisplay.Bounds.Top, width, height), pixelFormat);
-                        //Bitmap dupBitmap = frame.DesktopImage;
-                        //dupBitmap.Save($@"C:\Users\zz030209\Pictures\Capture\Test\dupTest{desktopDuplicator1.GetHashCode()}.png");
-                        memg.DrawImage(dupBitmap, 0, 0);
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(tryCount + ": " + ex.Message);
-                        message.Append(tryCount + ": " + ex.Message + "\n");
-                        MainWindow.logger.Error(ex.Message + Environment.NewLine + ex.StackTrace);
-                        if (desktopDuplicator.Disposed == false)
-                            desktopDuplicator.Dispose();
-                        desktopDuplicator = new DesktopDuplication.DesktopDuplicator(displayIndex);
-                        if (tryCount >= 2)
-                        {
-                            throw new Exception(message.ToString());
-                        }
-                        tryCount++;
-                        //if (ex.Message.Equals("Failed to acquire next frame."))
-                        //{
-                        //    System.Threading.Thread.Sleep(200);
-                        //    Debug.WriteLine("200ms wait");
-                        //}
-                        System.Threading.Thread.Sleep(3000);
-                    }
-                }
+                // [変更] DesktopDuplication.dll の遅延ロードのため分離クラスに委譲
+                // このメソッドが初めて呼ばれるまで DesktopDuplication.dll はロードされない
+                DesktopDuplicationCapture.Capture(rect, displayIndex, activeDisplay, pixelFormat, memg, width, height);
             }
             else
             {

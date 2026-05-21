@@ -84,6 +84,7 @@
     </ApplicationDefinition>
     <Compile Include="CaptureHistoryItem.cs" />
     <Compile Include="CaptureHistoryManager.cs" />
+    <Compile Include="DesktopDuplicationCapture.cs" />
     <Compile Include="Extend.cs" />
     <Compile Include="HistoryItemViewModel.cs" />
     <Compile Include="HistoryWindow.xaml.cs">
