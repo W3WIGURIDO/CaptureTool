@@ -1164,22 +1164,26 @@ namespace CaptureTool
             return str.Remove(index, Math.Min(length, str.Length - index)).Insert(index, replace);
         }
 
+        // [2026-05-26 修正] 無限ループ → リトライ上限追加
+        // クリップボードが永続的にロックされている場合に無限ループとなる問題を修正
         public static string GetClipBoardText()
         {
-            string result = null;
-            while (result == null)
+            const int maxRetry = 10;
+            const int retryIntervalMs = 100;
+            for (int i = 0; i < maxRetry; i++)
             {
                 try
                 {
-                    result = Clipboard.GetText(TextDataFormat.Text);
-                    break;
+                    return Clipboard.GetText(TextDataFormat.Text);
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine($"GetClipBoardText retry {i + 1}/{maxRetry}: {ex.Message}");
+                    if (i < maxRetry - 1)
+                        System.Threading.Thread.Sleep(retryIntervalMs);
                 }
             }
-            return result;
+            return null;
         }
 
         public static int GetContinueFileNameOld(Settings settings)
