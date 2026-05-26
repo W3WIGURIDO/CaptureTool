@@ -886,7 +886,22 @@ namespace CaptureTool
             cursor.Draw(g, new Rectangle(DrPosition, cursor.Size));
         }
 
+        /// <summary>
+        /// Bitmap を Format32bppArgb に変換して返す。
+        /// すでに Format32bppArgb の場合は元のインスタンスをそのまま返す（呼び出し元での Dispose 不要）。
+        /// 変換した場合は新規 Bitmap を返すため、呼び出し元で Dispose すること。
+        /// </summary>
+        private static Bitmap EnsureArgb32(Bitmap src)
+        {
+            if (src.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                return src;
+            var dst = new Bitmap(src.Width, src.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var gc = Graphics.FromImage(dst))
+                gc.DrawImage(src, 0, 0, src.Width, src.Height);
+            return dst;
+        }
 
+        // [2026-05-26 修正] GetPixel/SetPixelループ → LockBits化
         public static void WriteCursorToGrap2(Graphics g, int left, int top, bool enableSetArrow)
         {
             var cInfo = new CURSORINFO
@@ -909,55 +924,113 @@ namespace CaptureTool
             {
                 return;
             }
-            System.Drawing.Point DrPosition = new System.Drawing.Point((cInfo.ptScreenPos.X - iconInfo.xHotspot - left), (cInfo.ptScreenPos.Y - iconInfo.yHotspot - top));
-            Bitmap hbmMask;
-            Bitmap hbmColor;
+            System.Drawing.Point DrPosition = new System.Drawing.Point(
+                (cInfo.ptScreenPos.X - iconInfo.xHotspot - left),
+                (cInfo.ptScreenPos.Y - iconInfo.yHotspot - top));
+
             if (iconInfo.hbmMask != IntPtr.Zero)
             {
-                hbmMask = System.Drawing.Image.FromHbitmap(iconInfo.hbmMask);
-                Bitmap tempB = new Bitmap(hbmMask.Width, hbmMask.Width);
+                Bitmap hbmMask = System.Drawing.Image.FromHbitmap(iconInfo.hbmMask);
                 Bitmap topMask = null;
                 Bitmap underMask = null;
+
                 if (hbmMask.Height == hbmMask.Width * 2 && oBitmap.Width == hbmMask.Width && oBitmap.Height == hbmMask.Width)
                 {
-                    underMask = hbmMask.Clone(new Rectangle(0, hbmMask.Width, hbmMask.Width, hbmMask.Width), hbmMask.PixelFormat);
+                    underMask = hbmMask.Clone(
+                        new Rectangle(0, hbmMask.Width, hbmMask.Width, hbmMask.Width),
+                        hbmMask.PixelFormat);
                 }
                 else if (iconInfo.hbmColor != IntPtr.Zero)
                 {
-                    //topMask = oBitmap.Clone(new Rectangle(0, 0, oBitmap.Width, oBitmap.Height), oBitmap.PixelFormat);
-                    topMask = hbmMask.Clone(new Rectangle(0, 0, hbmMask.Width, hbmMask.Width), hbmMask.PixelFormat);
-                    hbmColor = System.Drawing.Image.FromHbitmap(iconInfo.hbmColor);
-                    underMask = hbmColor;
+                    topMask = hbmMask.Clone(
+                        new Rectangle(0, 0, hbmMask.Width, hbmMask.Width),
+                        hbmMask.PixelFormat);
+                    underMask = System.Drawing.Image.FromHbitmap(iconInfo.hbmColor);
                 }
                 else
                 {
                     g.DrawImage(oBitmap, DrPosition.X, DrPosition.Y);
                     return;
                 }
-                for (int tx = 0; tx < hbmMask.Width; tx++)
+
+                int w = hbmMask.Width;
+                Bitmap tempB = new Bitmap(w, w, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                // 1bpp等の非32bppビットマップをFormat32bppArgbに統一してからLockBits
+                // EnsureArgb32 は変換不要な場合は元のインスタンスをそのまま返すため、
+                // ReferenceEquals で判定して変換で新規生成されたものだけ Dispose する
+                Bitmap oBmp = EnsureArgb32(oBitmap);
+                Bitmap tBmp = topMask != null ? EnsureArgb32(topMask) : null;
+                Bitmap uBmp = EnsureArgb32(underMask);
+                try
                 {
-                    for (int ty = 0; ty < hbmMask.Width; ty++)
+                    var rect = new Rectangle(0, 0, w, w);
+                    BitmapData oBD = oBmp.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    BitmapData uBD = uBmp.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    BitmapData tempD = tempB.LockBits(rect, ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    BitmapData tBD = tBmp?.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    try
                     {
-                        System.Drawing.Color oc = oBitmap.GetPixel(tx, ty);
-                        System.Drawing.Color tc;
-                        if (topMask == null)
+                        unsafe
                         {
-                            tc = oc;
+                            byte* oPtr = (byte*)oBD.Scan0;
+                            byte* uPtr = (byte*)uBD.Scan0;
+                            byte* dPtr = (byte*)tempD.Scan0;
+                            byte* tPtr = tBD != null ? (byte*)tBD.Scan0 : null;
+                            int tStride = tBD != null ? tBD.Stride : 0;
+
+                            for (int ty = 0; ty < w; ty++)
+                            {
+                                byte* oRow = oPtr + ty * oBD.Stride;
+                                byte* uRow = uPtr + ty * uBD.Stride;
+                                byte* dRow = dPtr + ty * tempD.Stride;
+                                byte* tRow = tPtr != null ? tPtr + ty * tStride : null;
+
+                                for (int tx = 0; tx < w; tx++)
+                                {
+                                    int off = tx * 4;
+                                    // Format32bppArgb のメモリ順: B, G, R, A
+                                    byte oA = oRow[off + 3];
+
+                                    byte tBv, tG, tR;
+                                    if (tRow != null)
+                                    {
+                                        // topMask あり：topMask のRGBを tc として使う
+                                        tBv = tRow[off];
+                                        tG = tRow[off + 1];
+                                        tR = tRow[off + 2];
+                                    }
+                                    else
+                                    {
+                                        // topMask なし：oBitmap のRGBをそのまま tc として使う（元のロジックと同等）
+                                        tBv = oRow[off];
+                                        tG = oRow[off + 1];
+                                        tR = oRow[off + 2];
+                                    }
+
+                                    dRow[off] = (byte)(tBv ^ uRow[off]);
+                                    dRow[off + 1] = (byte)(tG ^ uRow[off + 1]);
+                                    dRow[off + 2] = (byte)(tR ^ uRow[off + 2]);
+                                    dRow[off + 3] = oA;
+                                }
+                            }
                         }
-                        else
-                        {
-                            tc = topMask.GetPixel(tx, ty);
-                            //tc = System.Drawing.Color.FromArgb(oc.A, tc.R ^ oc.R, tc.G ^ oc.G, tc.B ^ oc.B);
-                        }
-                        System.Drawing.Color uc = underMask.GetPixel(tx, ty);
-                        System.Drawing.Color xorColor = System.Drawing.Color.FromArgb(oc.A, tc.R ^ uc.R, tc.G ^ uc.G, tc.B ^ uc.B);
-                        //if (topMask != null && tc.ToArgb() == System.Drawing.Color.White.ToArgb())
-                        //{
-                        //    xorColor = System.Drawing.Color.Transparent;
-                        //}
-                        tempB.SetPixel(tx, ty, xorColor);
+                    }
+                    finally
+                    {
+                        oBmp.UnlockBits(oBD);
+                        uBmp.UnlockBits(uBD);
+                        tempB.UnlockBits(tempD);
+                        if (tBmp != null) tBmp.UnlockBits(tBD);
                     }
                 }
+                finally
+                {
+                    if (!ReferenceEquals(oBmp, oBitmap)) oBmp.Dispose();
+                    if (tBmp != null && !ReferenceEquals(tBmp, topMask)) tBmp.Dispose();
+                    if (!ReferenceEquals(uBmp, underMask)) uBmp.Dispose();
+                }
+
                 g.DrawImage(tempB, DrPosition.X, DrPosition.Y);
                 return;
             }
