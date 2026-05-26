@@ -48,7 +48,16 @@ namespace CaptureTool
 
             double scaleX = (double)maxWidth / bitmap.Width;
             double scaleY = (double)maxHeight / bitmap.Height;
-            double scale = Math.Min(scaleX, scaleY);
+            double scale = Math.Min(1.0, Math.Min(scaleX, scaleY));
+
+            // リサイズが処理速度・メモリ双方で有利となる閾値
+            // HighQualityBicubicのサンプリングコストを考慮した損益分岐点（≒0.33〜0.58）の
+            // 中間値として0.5を採用。この値でリサイズにより面積が1/4以下となる。
+            const double ResizeThreshold = 0.5;
+
+            // 閾値以上はリサイズのコストが削減効果を上回るため直接変換
+            if (scale >= ResizeThreshold)
+                return ConvertBitmapToBitmapImage(bitmap);
 
             int newWidth = Math.Max(1, (int)(bitmap.Width * scale));
             int newHeight = Math.Max(1, (int)(bitmap.Height * scale));
