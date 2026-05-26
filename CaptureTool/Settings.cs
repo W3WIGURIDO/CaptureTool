@@ -13,6 +13,7 @@ using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.
 
 namespace CaptureTool
 {
+    // [2026-05-26 修正] 各プロパティ：CallerMemberNameで解決済みのため重複呼び出しを削除
     public class Settings : INotifyPropertyChanged
     {
         const string WordDir = "<Dir>";
@@ -230,7 +231,6 @@ namespace CaptureTool
                 }
                 _Directory = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Directory));
                 if (FileName != null && FileName.Contains(WordDir))
                 {
                     CreateSampleFileName();
@@ -253,7 +253,6 @@ namespace CaptureTool
                     {
                         MessageBox.Show("保存パスはフォルダパス、ファイルパス含めて260字未満になるように設定してください。" + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
                         RaisePropertyChanged();
-                        RaisePropertyChanged(nameof(FileName));
                         return;
                     }
                     string[] enSplited = tmpValue.Split('\\');
@@ -271,7 +270,6 @@ namespace CaptureTool
                         Directory += string.Join("\\", enSplited.Take(enSplited.Length - 1));
                     }
                     RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(FileName));
                     CreateSampleFileName();
                 }
                 catch (Exception ex)
@@ -295,7 +293,6 @@ namespace CaptureTool
             {
                 _EnableNumber = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableNumber));
                 CreateSampleFileName();
             }
         }
@@ -323,7 +320,6 @@ namespace CaptureTool
                     _DigitsText = 1.ToString();
                 }
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(DigitsText));
                 RaisePropertyChanged(nameof(NumberDigits));
                 CreateSampleFileName();
             }
@@ -337,7 +333,6 @@ namespace CaptureTool
             {
                 _NumberCount = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(NumberCount));
                 CreateSampleFileName();
             }
         }
@@ -350,7 +345,6 @@ namespace CaptureTool
             {
                 _SaveFormatIndex = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(SaveFormatIndex));
                 CreateSampleFileName();
             }
         }
@@ -369,7 +363,6 @@ namespace CaptureTool
             {
                 _EnableTray = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableTray));
             }
         }
 
@@ -381,7 +374,6 @@ namespace CaptureTool
             {
                 _EnableOverlay = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableOverlay));
             }
         }
 
@@ -509,7 +501,6 @@ namespace CaptureTool
                 _EnableChangeCapture = value;
                 DisableAero = !value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableChangeCapture));
             }
         }
 
@@ -521,7 +512,6 @@ namespace CaptureTool
             {
                 _DisableAero = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(DisableAero));
             }
         }
 
@@ -533,7 +523,6 @@ namespace CaptureTool
             {
                 _OverlayX = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(OverlayX));
             }
         }
 
@@ -545,7 +534,6 @@ namespace CaptureTool
             {
                 _OverlayY = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(OverlayY));
             }
         }
 
@@ -557,7 +545,6 @@ namespace CaptureTool
             {
                 _EnableSetArrow = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableSetArrow));
             }
         }
 
@@ -569,7 +556,6 @@ namespace CaptureTool
             {
                 _PixelFormatIndex = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(PixelFormatIndex));
             }
         }
 
@@ -587,7 +573,6 @@ namespace CaptureTool
             {
                 _CaptureModeIndex = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CaptureModeIndex));
             }
         }
 
@@ -605,7 +590,6 @@ namespace CaptureTool
             {
                 _EnableVisibilityControl = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(EnableVisibilityControl));
             }
         }
 
@@ -618,7 +602,6 @@ namespace CaptureTool
                 string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"<>|\r\n]", string.Empty);
                 _CountConju = tmpValue;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CountConju));
                 CreateSampleFileName();
             }
         }
@@ -692,7 +675,6 @@ namespace CaptureTool
             {
                 _CompressIndex = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CompressIndex));
             }
         }
 
@@ -710,7 +692,6 @@ namespace CaptureTool
             {
                 _CompressIndexZopfli = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CompressIndexZopfli));
             }
         }
 
@@ -729,7 +710,6 @@ namespace CaptureTool
             {
                 _CompressIndexOxipng = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CompressIndexOxipng));
             }
         }
 
@@ -753,7 +733,6 @@ namespace CaptureTool
             {
                 _CompressSelect = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(CompressSelect));
             }
         }
 
