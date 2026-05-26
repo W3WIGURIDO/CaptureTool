@@ -36,6 +36,34 @@ namespace CaptureTool
             }
         }
 
+        /// <summary>
+        /// オーバーレイ表示用に Bitmap をリサイズしてから BitmapSource に変換する。
+        /// アスペクト比を保ちながら maxWidth × maxHeight に収まるよう縮小する。
+        /// 変換元 Bitmap はそのまま保持し、呼び出し元で破棄すること。
+        /// </summary>
+        public static BitmapSource ConvertBitmapToOverlayBitmapSource(
+            Bitmap bitmap, int maxWidth, int maxHeight)
+        {
+            if (bitmap == null) return null;
+
+            double scaleX = (double)maxWidth / bitmap.Width;
+            double scaleY = (double)maxHeight / bitmap.Height;
+            double scale = Math.Min(scaleX, scaleY);
+
+            int newWidth = Math.Max(1, (int)(bitmap.Width * scale));
+            int newHeight = Math.Max(1, (int)(bitmap.Height * scale));
+
+            using (var resized = new Bitmap(newWidth, newHeight,
+                       System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            using (var g = Graphics.FromImage(resized))
+            {
+                g.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(bitmap, 0, 0, newWidth, newHeight);
+                return ConvertBitmapToBitmapImage(resized);
+            }
+        }
+
         public static IntPtr GetHandle(this Window window)
         {
             System.Windows.Interop.WindowInteropHelper helper = new System.Windows.Interop.WindowInteropHelper(window);

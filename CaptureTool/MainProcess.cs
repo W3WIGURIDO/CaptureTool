@@ -562,10 +562,14 @@ namespace CaptureTool
                 try
                 {
                     bitmap = CaptureControl(windowHandle, captureMode, false, screenFlag, aero, enableCursor, enableSetArrow, pixelFormat);
-                    //画面表示用
-                    //[2026/05/18]bitmapの競合回避のため、作成タイミングを変更
-                    imageSource = Extend.ConvertBitmapToBitmapImage(bitmap);
-                    imageSource.Freeze();
+                    // [変更] オーバーレイ有効時のみ・表示サイズに縮小してからBitmapSource化する
+                    // フルサイズのGPUテクスチャアップロードを回避しメモリと変換コストを削減する
+                    if (enableOverlay)
+                    {
+                        imageSource = Extend.ConvertBitmapToOverlayBitmapSource(
+                            bitmap, (int)imageGridWidth, (int)imageGridHeight);
+                        imageSource?.Freeze();
+                    }
 
                     ImageFormat imageFormat;
                     if (imageFormatName.ToUpper().CompareTo("PNG") == 0)
