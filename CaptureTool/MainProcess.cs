@@ -991,10 +991,12 @@ namespace CaptureTool
             }
         }
 
+        // [2026-05-21 追加] Regexインスタンスを毎回生成しないようstaticキャッシュ化
+        private static readonly Regex _fileNameNumberRegex = new Regex("[0-9]+", RegexOptions.Compiled);
+
         public static MatchCollection FileNameNumberSearch(string fileName)
         {
-            Regex regex = new Regex("[0-9]+");
-            return regex.Matches(fileName);
+            return _fileNameNumberRegex.Matches(fileName);
         }
 
         public static void CreateFileNameNumberCountButtons(string fileName, StackPanel owner, Settings settings, int mode)
@@ -1136,12 +1138,14 @@ namespace CaptureTool
                 {
                     return 0;
                 }
-                var fList = System.IO.Directory.EnumerateFiles(dirName).Select(path => Path.GetFileName(path))
-                    .Where(str => { if (Regex.Match(str, fileName + settings.CountConju + "[0-9]{" + settings.NumberDigits + "}\\." + settings.SaveFormats[(SaveFormat)settings.SaveFormatIndex]).Success) { return true; } return false; })
-                    .OrderByDescending(x => x);
-                if (fList.Count() > 0)
+                // [2026-05-21 修正] Count()+ElementAt(0)の二重列挙をFirstOrDefaultに統合
+                var lastName = System.IO.Directory.EnumerateFiles(dirName)
+                    .Select(path => Path.GetFileName(path))
+                    .Where(str => Regex.Match(str, fileName + settings.CountConju + "[0-9]{" + settings.NumberDigits + "}\\." + settings.SaveFormats[(SaveFormat)settings.SaveFormatIndex]).Success)
+                    .OrderByDescending(x => x)
+                    .FirstOrDefault();
+                if (lastName != null)
                 {
-                    var lastName = fList.ElementAt(0);
                     var countStr = Path.GetFileNameWithoutExtension(lastName).Replace(fileName + settings.CountConju, "");
                     if (int.TryParse(countStr, out int result))
                     {
