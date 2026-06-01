@@ -285,6 +285,10 @@ namespace CaptureTool
             get => _SampleFileName;
         }
 
+        // [2026-05-27 追加] CreateSampleFileName多重呼び出し抑制用ネストカウンタ
+        // コンストラクタ・ResetSettings実行中はスキップし、完了時に1回だけ生成する
+        private int _suppressSampleFileNameDepth = 0;
+
         private bool? _EnableNumber;
         public bool? EnableNumber
         {
@@ -857,6 +861,8 @@ namespace CaptureTool
 
         private string CreateSampleFileName()
         {
+            // [2026-05-27 追加] 抑制中（コンストラクタ・ResetSettings実行中）はスキップ
+            if (_suppressSampleFileNameDepth > 0) return _SampleFileName ?? string.Empty;
             _SampleFileName = GetSampleFileName(NumberCount);
             RaisePropertyChanged(nameof(SampleFileName));
             return _SampleFileName;
@@ -1041,6 +1047,9 @@ namespace CaptureTool
         }
 
         private bool? _EnableSetFileNameOnCapture;
+        /// <summary>
+        /// キャプチャ実行時にダイアログでファイル名を設定するかのフラグ
+        /// </summary>
         public bool? EnableSetFileNameOnCapture
         {
             get => _EnableSetFileNameOnCapture;
@@ -1089,8 +1098,14 @@ namespace CaptureTool
         const string SettingPreName = "setting";
         const string SettingExtension = ".xml";
         const string DefaultSettingName = "DefaultSetting.xml";
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="tabNumber"></param>
         public Settings(int tabNumber)
         {
+            // [2026-05-27 追加] 初期化中のCreateSampleFileName多重呼び出しを抑制
+            _suppressSampleFileNameDepth++;
             TabNumber = tabNumber;
             if (tabNumber == -1)
             {
@@ -1259,6 +1274,9 @@ namespace CaptureTool
             {
                 ResetSettings();
             }
+            // [2026-05-27 追加] 抑制解除 → 初期化完了後に1回だけ生成
+            _suppressSampleFileNameDepth--;
+            CreateSampleFileName();
         }
 
         public void SaveSettings()
@@ -1329,6 +1347,8 @@ namespace CaptureTool
 
         public void ResetSettings()
         {
+            // [2026-05-27 追加] ResetSettings内のCreateSampleFileName多重呼び出しを抑制
+            _suppressSampleFileNameDepth++;
             Key = Keys.Q;
             PreKey = Keys.Control;
             Directory = defaultDirectory;
@@ -1379,6 +1399,9 @@ namespace CaptureTool
             EnableAutoContinueCount = true;
             FileNameComboSourceText = "";
             EnableSetFileNameOnCapture = false;
+            // [2026-05-27 追加] 抑制解除 → リセット完了後に1回だけ生成
+            _suppressSampleFileNameDepth--;
+            CreateSampleFileName();
         }
     }
 
