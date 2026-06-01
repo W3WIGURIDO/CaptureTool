@@ -251,7 +251,8 @@ namespace CaptureTool
                     string tmpValue = System.Text.RegularExpressions.Regex.Replace(value, "[/:*?\"|\r\n]", string.Empty);
                     if (tmpValue.Length > 259)
                     {
-                        MessageBox.Show("保存パスはフォルダパス、ファイルパス含めて260字未満になるように設定してください。" + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
+                        // [変更] System.Windows.Forms.MessageBox → System.Windows.MessageBox に置換
+                        System.Windows.MessageBox.Show("保存パスはフォルダパス、ファイルパス含めて260字未満になるように設定してください。" + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
                         RaisePropertyChanged();
                         return;
                     }
@@ -274,7 +275,8 @@ namespace CaptureTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
+                    // [変更] System.Windows.Forms.MessageBox → System.Windows.MessageBox に置換
+                    System.Windows.MessageBox.Show(ex.Message + Environment.NewLine + "設定しようとした値：" + Environment.NewLine + value);
                 }
             }
         }
