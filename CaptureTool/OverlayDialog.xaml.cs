@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -117,27 +116,21 @@ namespace CaptureTool
         {
             Left = Owner.Left + Owner.Width / 2 - Width / 2;
             Top = Owner.Top + Owner.Height / 2 - Height / 2;
-            Task.Run(() =>
+
+            // [2026-05-27 修正] Task.Run+Thread.Sleep+Dispatcher.Invokeループ
+            //                   → Storyboard + BeginTime に変更（スレッド占有を排除）
+            var da = new DoubleAnimation
             {
-                Thread.Sleep(1500);
-                bool isContinue = true;
-                while (isContinue)
-                {
-                    gridView.Dispatcher.Invoke(() =>
-                    {
-                        gridView.Opacity = gridView.Opacity - 0.1;
-                        if (gridView.Opacity <= 0)
-                        {
-                            isContinue = false;
-                        }
-                    });
-                    Thread.Sleep(100);
-                }
-                Dispatcher.Invoke(() =>
-                {
-                    Close();
-                });
-            });
+                To = 0,
+                BeginTime = TimeSpan.FromMilliseconds(1500), // 1500ms 表示維持
+                Duration = TimeSpan.FromSeconds(1)          // 1秒でフェードアウト
+            };
+            var storyboard = new Storyboard();
+            Storyboard.SetTarget(da, gridView);
+            Storyboard.SetTargetProperty(da, new PropertyPath(UIElement.OpacityProperty));
+            storyboard.Children.Add(da);
+            storyboard.Completed += (s, args) => Close();
+            storyboard.Begin();
         }
     }
 }

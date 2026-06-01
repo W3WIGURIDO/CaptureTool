@@ -5,8 +5,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -232,45 +230,33 @@ namespace CaptureTool
 
         private void GridView_Loaded(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
+            // [2026-05-27 修正] Task.Run+Thread.Sleep+OpacityAnimation呼び出し
+            //                   → Storyboard + BeginTime に統合（スレッド占有を排除）
+            var da = new DoubleAnimation
             {
-                Thread.Sleep(OverlayTime);
-                Dispatcher.Invoke(() => { OpacityAnimation(); });
-                Thread.Sleep(1000);
+                To = 0,
+                BeginTime = TimeSpan.FromMilliseconds(OverlayTime), // 設定値の表示時間だけ待機
+                Duration = TimeSpan.FromSeconds(1)                 // 1秒でフェードアウト
+            };
+            var storyboard = new Storyboard();
+            Storyboard.SetTarget(da, gridView);
+            Storyboard.SetTargetProperty(da, new PropertyPath(UIElement.OpacityProperty));
+            storyboard.Children.Add(da);
+            storyboard.Completed += (s, args) =>
+            {
                 if (ClosingReady)
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        ImageSource = null;
-                        Close();
-                        MainProcess.prevOverlayWindow = null;
-                    }, System.Windows.Threading.DispatcherPriority.Send);
+                    ImageSource = null;
+                    Close();
+                    MainProcess.prevOverlayWindow = null;
                 }
-            });
+            };
+            storyboard.Begin();
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             _ClosingReady = false;
-        }
-
-        private void OpacityAnimation()
-        {
-            var storyboard = new Storyboard();
-            DoubleAnimation CreateDoubleAnimation()
-            {
-                var da = new DoubleAnimation();
-                Storyboard.SetTarget(da, gridView);
-                Storyboard.SetTargetProperty(da, new PropertyPath("(Opacity)"));
-                storyboard.Children.Add(da);
-                return da;
-            }
-            DoubleAnimation da1 = CreateDoubleAnimation();
-            da1.To = 0;
-            da1.Duration = TimeSpan.FromSeconds(1);
-
-            // アニメーションを開始します
-            storyboard.Begin();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
