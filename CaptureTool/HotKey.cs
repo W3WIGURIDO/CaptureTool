@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Interop;
 
 namespace CaptureTool
 {
     class HotKey : IDisposable
     {
-        HotKeyForm form;
+        // [変更] WinForms HotKeyForm → HwndSource ベースの HotKeyWindow に置換
+        private HotKeyWindow _window;
         public event EventHandler HotKeyPush;
         public string HotKeyName { get; set; }
 
@@ -20,20 +20,17 @@ namespace CaptureTool
 
         public HotKey(MOD_KEY modKey, Keys key)
         {
-            form = new HotKeyForm(modKey, key, raiseHotKeyPush);
+            _window = new HotKeyWindow(modKey, key, raiseHotKeyPush);
         }
 
         private void raiseHotKeyPush()
         {
-            if (HotKeyPush != null)
-            {
-                HotKeyPush(this, EventArgs.Empty);
-            }
+            HotKeyPush?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            form.Dispose();
+            _window.Dispose();
             _Disposed = true;
         }
 
@@ -47,48 +44,67 @@ namespace CaptureTool
             return false;
         }
 
-        private class HotKeyForm : Form
+        // [変更] WinForms Form を HwndSource（HWND_MESSAGE ウィンドウ）に置換
+        // WM_HOTKEY を受信するための非表示メッセージウィンドウ
+        private class HotKeyWindow : IDisposable
         {
             [DllImport("user32.dll")]
-            extern static int RegisterHotKey(IntPtr HWnd, int ID, MOD_KEY MOD_KEY, Keys KEY);
+            static extern int RegisterHotKey(IntPtr hWnd, int id, MOD_KEY fsModifiers, Keys vk);
 
             [DllImport("user32.dll")]
-            extern static int UnregisterHotKey(IntPtr HWnd, int ID);
+            static extern int UnregisterHotKey(IntPtr hWnd, int id);
 
             const int WM_HOTKEY = 0x0312;
-            int id;
-            ThreadStart proc;
 
-            public HotKeyForm(MOD_KEY modKey, Keys key, ThreadStart proc)
+            private readonly HwndSource _hwndSource;
+            private readonly HwndSourceHook _hook;
+            private readonly ThreadStart _proc;
+            private int _id;
+
+            public HotKeyWindow(MOD_KEY modKey, Keys key, ThreadStart proc)
             {
-                this.proc = proc;
+                _proc = proc;
+                _hook = WndProc;
+
+                // HWND_MESSAGE（-3）を親に指定することで非表示のメッセージ専用ウィンドウを生成する
+                var parameters = new HwndSourceParameters("HotKeyWindow")
+                {
+                    WindowStyle = 0,
+                    ExtendedWindowStyle = 0,
+                    PositionX = 0,
+                    PositionY = 0,
+                    Width = 0,
+                    Height = 0,
+                    ParentWindow = new IntPtr(-3),
+                };
+                _hwndSource = new HwndSource(parameters);
+                _hwndSource.AddHook(_hook);
+
                 for (int i = 0x0000; i <= 0xbfff; i++)
                 {
-                    if (RegisterHotKey(this.Handle, i, modKey, key) != 0)
+                    if (RegisterHotKey(_hwndSource.Handle, i, modKey, key) != 0)
                     {
-                        id = i;
+                        _id = i;
                         break;
                     }
                 }
             }
 
-            protected override void WndProc(ref Message m)
+            private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
             {
-                base.WndProc(ref m);
-
-                if (m.Msg == WM_HOTKEY)
+                if (msg == WM_HOTKEY && wParam.ToInt32() == _id)
                 {
-                    if ((int)m.WParam == id)
-                    {
-                        proc();
-                    }
+                    _proc();
+                    handled = true;
                 }
+                return IntPtr.Zero;
             }
 
-            protected override void Dispose(bool disposing)
+            public void Dispose()
             {
-                UnregisterHotKey(this.Handle, id);
-                base.Dispose(disposing);
+                UnregisterHotKey(_hwndSource.Handle, _id);
+                _hwndSource.RemoveHook(_hook);
+                _hwndSource.Dispose();
             }
         }
     }
@@ -104,7 +120,7 @@ namespace CaptureTool
     {
         public static Keys[] GetKeyModFlags(Keys key)
         {
-            List<Keys> keyList = new List<Keys>();
+            List<Keys> keyList = new System.Collections.Generic.List<Keys>();
             void FlagCheck(Keys flagKey)
             {
                 if (key.HasFlag(flagKey))

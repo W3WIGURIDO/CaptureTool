@@ -1,0 +1,21 @@
+﻿<Window x:Class="CaptureTool.KeyInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="キーを入力してください。" Height="150" Width="260"
+        WindowStyle="ToolWindow" ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="キーを入力してください。"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        <!-- [追加] キー登録の削除ボタン（None に設定して閉じる） -->
+        <Button Grid.Row="1" Content="登録を削除（None）"
+                HorizontalAlignment="Center"
+                Margin="5"
+                Click="DeleteButton_Click"/>
+    </Grid>
+</Window>

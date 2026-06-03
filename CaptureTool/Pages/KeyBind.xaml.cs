@@ -113,15 +113,46 @@ namespace CaptureTool.Pages
         private System.Windows.Forms.Keys ShowKeyInputDialog(bool enablePreMode)
         {
             Window activeWindow = MainWindow.ActiveWindow;
-            KeyInputForm keyInputForm = new KeyInputForm()
+            // [変更] WinForms KeyInputForm → WPF KeyInputDialog に置換
+            var dialog = new KeyInputDialog
             {
-                StartPosition = System.Windows.Forms.FormStartPosition.Manual,
-                Location = new System.Drawing.Point((int)activeWindow.Left, (int)activeWindow.Top),
-                TopMost = settings.TopMost
+                Left = activeWindow.Left,
+                Top = activeWindow.Top,
+                Topmost = settings.TopMost,
+                PreMode = enablePreMode
             };
-            keyInputForm.PreMode = enablePreMode;
-            keyInputForm.ShowDialog();
-            return keyInputForm.Key;
+            dialog.ShowDialog();
+            // [変更] int（VKコード）→ Keys に変換（WinForms 境界はこのクラスで集約）
+            return NormalizeVkToKeys(dialog.Key);
         }
+
+        // [追加] VKコード(int) → Keys への変換
+        // 修飾キーは左右の区別なく正規化する（表示・XML保存の一貫性を維持）
+        private static System.Windows.Forms.Keys NormalizeVkToKeys(int vk)
+        {
+            switch (vk)
+            {
+                case VkShift:
+                case VkLShift:
+                case VkRShift: return System.Windows.Forms.Keys.Shift;
+                case VkControl:
+                case VkLControl:
+                case VkRControl: return System.Windows.Forms.Keys.Control;
+                case VkMenu:
+                case VkLMenu:
+                case VkRMenu: return System.Windows.Forms.Keys.Alt;
+                default: return (System.Windows.Forms.Keys)vk;
+            }
+        }
+
+        private const int VkShift = 0x10;
+        private const int VkControl = 0x11;
+        private const int VkMenu = 0x12;
+        private const int VkLShift = 0xA0;
+        private const int VkRShift = 0xA1;
+        private const int VkLControl = 0xA2;
+        private const int VkRControl = 0xA3;
+        private const int VkLMenu = 0xA4;
+        private const int VkRMenu = 0xA5;
     }
 }
