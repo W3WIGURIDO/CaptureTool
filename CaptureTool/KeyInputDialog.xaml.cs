@@ -139,13 +139,15 @@ namespace CaptureTool
         {
             return vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT
                 || vk == VK_CONTROL || vk == VK_LCONTROL || vk == VK_RCONTROL
-                || vk == VK_MENU || vk == VK_LMENU || vk == VK_RMENU;
+                || vk == VK_MENU || vk == VK_LMENU || vk == VK_RMENU
+                // [追加] Windows キーを修飾キーとして扱う
+                || vk == VK_LWIN || vk == VK_RWIN;
         }
 
-        // [追加] 登録対象から除外するキー（捕捉せず常にブロック）
+        // [変更] Windows キー対応により除外キーなし
         private static bool IsExcludedVk(int vk)
         {
-            return vk == VK_LWIN || vk == VK_RWIN;
+            return false;
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)

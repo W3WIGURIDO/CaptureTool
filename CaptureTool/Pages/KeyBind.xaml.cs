@@ -141,6 +141,9 @@ namespace CaptureTool.Pages
                 case VkMenu:
                 case VkLMenu:
                 case VkRMenu: return System.Windows.Forms.Keys.Alt;
+                // [追加] Windows キー（L/R を区別して保持）
+                case VkLWin: return System.Windows.Forms.Keys.LWin;
+                case VkRWin: return System.Windows.Forms.Keys.RWin;
                 default: return (System.Windows.Forms.Keys)vk;
             }
         }
@@ -154,5 +157,8 @@ namespace CaptureTool.Pages
         private const int VkRControl = 0xA3;
         private const int VkLMenu = 0xA4;
         private const int VkRMenu = 0xA5;
+        // [追加]
+        private const int VkLWin = 0x5B;
+        private const int VkRWin = 0x5C;
     }
 }

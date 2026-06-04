@@ -111,9 +111,12 @@ namespace CaptureTool
 
     public enum MOD_KEY : int
     {
+        NONE = 0x0000,
         ALT = 0x0001,
         CONTROL = 0x0002,
         SHIFT = 0x0004,
+        // [追加] Windows キー修飾子
+        WIN = 0x0008,
     }
 
     public static class EnumScan
@@ -144,6 +147,10 @@ namespace CaptureTool
 
         public static MOD_KEY FlagToMOD_KEY(Keys key)
         {
+            // [追加] Windows キーは HasFlag 判定が誤判定になるため先に直接比較する
+            if (key == Keys.LWin || key == Keys.RWin)
+                return MOD_KEY.WIN;
+
             Keys[] flagKeys = GetKeyModFlags(key);
             if (flagKeys.Contains(Keys.LControlKey) || flagKeys.Contains(Keys.RControlKey) || flagKeys.Contains(Keys.Control) || flagKeys.Contains(Keys.ControlKey))
             {
@@ -156,6 +163,10 @@ namespace CaptureTool
             else if (flagKeys.Contains(Keys.LShiftKey) || flagKeys.Contains(Keys.RShiftKey) || flagKeys.Contains(Keys.ShiftKey) || flagKeys.Contains(Keys.Shift))
             {
                 return MOD_KEY.SHIFT;
+            }
+            else if (key == Keys.None)
+            {
+                return MOD_KEY.NONE;
             }
             else
             {
