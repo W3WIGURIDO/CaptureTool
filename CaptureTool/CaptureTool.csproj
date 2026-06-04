@@ -97,20 +97,11 @@
     <Compile Include="KeyInputDialog.xaml.cs">
       <DependentUpon>KeyInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="KeyInputForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="KeyInputForm.Designer.cs">
-      <DependentUpon>KeyInputForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="MainInstance.xaml.cs">
       <DependentUpon>MainInstance.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindowDataContext.cs" />
-    <Compile Include="MiniWindow.xaml.cs">
-      <DependentUpon>MiniWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="NotifyIconWrapper.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -194,10 +185,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MiniWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="OverlayDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -273,9 +260,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="KeyInputForm.resx">
-      <DependentUpon>KeyInputForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="NotifyIconWrapper.resx">
       <DependentUpon>NotifyIconWrapper.cs</DependentUpon>
     </EmbeddedResource>
