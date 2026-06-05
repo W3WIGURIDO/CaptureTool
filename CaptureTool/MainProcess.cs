@@ -123,12 +123,30 @@ namespace CaptureTool
         public static int SM_YVIRTUALSCREEN = 77;
         public static int SM_CXVIRTUALSCREEN = 78;
         public static int SM_CYVIRTUALSCREEN = 79;
+        // [2026-06-04 追加] カーソルサイズ取得用
+        public static int SM_CXCURSOR = 13;
+        public static int SM_CYCURSOR = 14;
 
         [DllImport("user32.dll")]
         public extern static int GetSystemMetrics(int smIndex);
 
         [DllImport("user32.dll")]
         public static extern bool GetCursorInfo(out CURSORINFO pci);
+
+        // [2026-06-04 追加] Cursor.Position 代替（System.Windows.Forms.Cursor 依存除去）
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT lpPoint);
+
+        // [2026-06-04 追加] WriteCursorToGrap P/Invoke化（System.Windows.Forms.Cursor 依存除去）
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+
+        [DllImport("user32.dll")]
+        public static extern bool DrawIconEx(IntPtr hdc, int xLeft, int yTop, IntPtr hIcon,
+            int cxWidth, int cyWidth, uint istepIfAniCur, IntPtr hbrFlickerFreeDraw, uint diFlags);
+
+        private const int IDC_ARROW = 32512;
+        private const uint DI_NORMAL = 0x0003;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct CURSORINFO
@@ -869,21 +887,37 @@ namespace CaptureTool
             }
         }
 
+        // [2026-06-04 変更] System.Windows.Forms.Cursor 依存を全てP/Invokeに置き換え
         public static void WriteCursorToGrap(Graphics g, int left, int top, bool enableSetArrow)
         {
-            System.Windows.Forms.Cursor cursor;
-            if (enableSetArrow)
+            IntPtr hCursor = enableSetArrow
+                ? LoadCursor(IntPtr.Zero, IDC_ARROW)
+                : (GetCursorInfo(out CURSORINFO cInfo) && cInfo.flags == CURSOR_SHOWING
+                    ? cInfo.hCursor
+                    : IntPtr.Zero);
+
+            if (hCursor == IntPtr.Zero)
+                return;
+
+            if (!GetIconInfo(hCursor, out ICONINFO iconInfo))
+                return;
+
+            GetCursorPos(out POINT cPos);
+            System.Drawing.Point drPosition = new System.Drawing.Point(
+                cPos.X - iconInfo.xHotspot - left,
+                cPos.Y - iconInfo.yHotspot - top);
+
+            IntPtr hdc = g.GetHdc();
+            try
             {
-                cursor = System.Windows.Forms.Cursors.Arrow;
+                DrawIconEx(hdc, drPosition.X, drPosition.Y, hCursor,
+                    GetSystemMetrics(SM_CXCURSOR), GetSystemMetrics(SM_CYCURSOR),
+                    0, IntPtr.Zero, DI_NORMAL);
             }
-            else
+            finally
             {
-                cursor = new System.Windows.Forms.Cursor(System.Windows.Forms.Cursor.Current.Handle);
+                g.ReleaseHdc(hdc);
             }
-            System.Drawing.Point cPoint = System.Windows.Forms.Cursor.Position;
-            System.Drawing.Point hSpot = cursor.HotSpot;
-            System.Drawing.Point DrPosition = new System.Drawing.Point((cPoint.X - hSpot.X - left), (cPoint.Y - hSpot.Y - top));
-            cursor.Draw(g, new Rectangle(DrPosition, cursor.Size));
         }
 
         /// <summary>
