@@ -11,10 +11,11 @@ namespace CaptureTool
         private static DesktopDuplication.DesktopDuplicator _duplicator;
         private static int _duplicatorNum = -1;
 
+        // [2026-06-05 変更] System.Windows.Forms.Screen → ScreenInfo (P/Invoke) に置換
         public static void Capture(
             MainProcess.RECT rect,
             int displayIndex,
-            System.Windows.Forms.Screen activeDisplay,
+            ScreenInfo activeDisplay,
             PixelFormat pixelFormat,
             Graphics memg,
             int width,

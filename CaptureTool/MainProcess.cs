@@ -231,12 +231,13 @@ namespace CaptureTool
             public Rectangle rcNormalPosition;
         }
 
+        // [2026-06-05 変更] List<Screen> → List<ScreenInfo> (P/Invoke) に置換
+        private static List<ScreenInfo> AllScreens;
 
         static MainProcess()
         {
-            AllScreens = System.Windows.Forms.Screen.AllScreens.ToList();
-            AllScreens.Remove(System.Windows.Forms.Screen.PrimaryScreen);
-            AllScreens.Insert(0, System.Windows.Forms.Screen.PrimaryScreen);
+            // [2026-06-05 変更] Screen.AllScreens/PrimaryScreen → ScreenUtil.GetAllScreens() に置換
+            AllScreens = ScreenUtil.GetAllScreens();
         }
 
         public static string FileNameDateRegexConvert(string origStr)
@@ -735,13 +736,13 @@ namespace CaptureTool
             return Extend.ConvertBitmapToBitmapImage(bitmap);
         }
 
-        private static List<System.Windows.Forms.Screen> AllScreens;
         private static Bitmap CaptureControl(IntPtr handle, int mode, bool extend, bool screenFlag, bool aero, bool enableCursor, bool enableSetArrow, System.Drawing.Imaging.PixelFormat pixelFormat)
         {
             int width;
             int height;
             RECT rect;
-            var activeDisplay = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+            // [2026-06-05 変更] Screen.FromPoint(Cursor.Position) → ScreenUtil.FromCursorPosition() に置換
+            var activeDisplay = ScreenUtil.FromCursorPosition();
             int displayIndex = AllScreens.IndexOf(activeDisplay);
 
             if (screenFlag)

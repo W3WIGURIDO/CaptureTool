@@ -269,8 +269,8 @@ namespace CaptureTool
         private void PositionWindow()
         {
             // アクティブ画面を取得（カーソル位置のモニター）
-            var screen = System.Windows.Forms.Screen.FromPoint(
-                System.Windows.Forms.Cursor.Position);
+            // [2026-06-05 変更] Screen.FromPoint(Cursor.Position) → ScreenUtil.FromCursorPosition() に置換
+            var screen = ScreenUtil.FromCursorPosition();
 
             // DPI 変換係数を取得（マルチモニター・高DPI対応）
             var source = PresentationSource.FromVisual(this);

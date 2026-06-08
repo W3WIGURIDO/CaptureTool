@@ -140,6 +140,7 @@
     <Compile Include="Pages\UISetting.xaml.cs">
       <DependentUpon>UISetting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ScreenUtil.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
