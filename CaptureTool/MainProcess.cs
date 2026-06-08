@@ -741,8 +741,12 @@ namespace CaptureTool
             int width;
             int height;
             RECT rect;
-            // [2026-06-05 変更] Screen.FromPoint(Cursor.Position) → ScreenUtil.FromCursorPosition() に置換
-            var activeDisplay = ScreenUtil.FromCursorPosition();
+            // [2026-06-08 変更] screenFlag に応じてアクティブディスプレイの取得方法を分岐
+            // ウィンドウキャプチャ時はカーソル位置ではなくウィンドウ位置のモニターを使用する
+            // （カーソルが別モニターにある場合に DesktopDuplication で OOM が発生する問題の修正）
+            var activeDisplay = screenFlag
+                ? ScreenUtil.FromCursorPosition()
+                : ScreenUtil.FromWindowHandle(handle);
             int displayIndex = AllScreens.IndexOf(activeDisplay);
 
             if (screenFlag)

@@ -78,6 +78,10 @@ namespace CaptureTool
         [DllImport("user32.dll")]
         private static extern IntPtr MonitorFromPoint(NativePoint pt, uint dwFlags);
 
+        // [2026-06-08 追加] ウィンドウハンドルからモニターハンドルを取得する
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
         [StructLayout(LayoutKind.Sequential)]
         private struct NativePoint { public int X, Y; }
 
@@ -134,6 +138,18 @@ namespace CaptureTool
         {
             GetCursorPos(out NativePoint pt);
             IntPtr hMon = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+            return BuildScreenInfo(hMon);
+        }
+
+        /// <summary>
+        /// ウィンドウハンドルのモニター情報を返す。
+        /// System.Windows.Forms.Screen.FromHandle(hwnd) に相当。
+        /// MONITOR_DEFAULTTONEAREST 指定のため null を返さない。
+        /// </summary>
+        // [2026-06-08 追加] ウィンドウ位置のモニター取得（DesktopDuplication ウィンドウキャプチャ用）
+        public static ScreenInfo FromWindowHandle(IntPtr hwnd)
+        {
+            IntPtr hMon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
             return BuildScreenInfo(hMon);
         }
 
